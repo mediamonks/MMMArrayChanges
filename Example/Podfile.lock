@@ -1,0 +1,22 @@
+PODS:
+  - MMMArrayChanges (0.1):
+    - MMMArrayChanges/Swift (= 0.1)
+  - MMMArrayChanges/ObjC (0.1)
+  - MMMArrayChanges/Swift (0.1):
+    - MMMArrayChanges/ObjC
+  - MMMArrayChanges/Tests (0.1)
+
+DEPENDENCIES:
+  - MMMArrayChanges (from `../`)
+  - MMMArrayChanges/Tests (from `../`)
+
+EXTERNAL SOURCES:
+  MMMArrayChanges:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  MMMArrayChanges: 7e98743b265f830d2bdd7cdbec7b3472372cd644
+
+PODFILE CHECKSUM: 56b92b465cf8257ff5aa0aad426af888e76ca347
+
+COCOAPODS: 1.7.5
