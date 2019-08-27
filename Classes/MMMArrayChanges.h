@@ -13,16 +13,16 @@ NS_ASSUME_NONNULL_BEGIN
 @class MMMArrayChangesUpdate;
 
 /**
- * Finds differences between two arrays with elements possibly of different types. (To get better autocompletion
+ * Finds differences between two arrays with elements possibly of different types. (To get better autocompletion in ObjC
  * you can specify these types as parameters, e.g. `MMMArrayChanges<MyListItem *, FIRDatabaseSnapshot *>`.)
  *
  * This is to help with detection of changes in a collection of items in general and in particular to have these changes
- * compatible with expectations of a UITableView.
+ * compatible with expectations of `UITableView`.
  *
  * A typical use case is when we sync a list of items with a backend periodically and want to properly animate all
  * the changes in the table view using batch updates.
  *
- * Note that in order to remain compatible with UITableView the indexes for removals and the source indexes
+ * Note that in order to remain compatible with `UITableView` the indexes for removals and the source indexes
  * for moves are always relative to the old array without any changes perfomed on it yet, while the target indexes
  * for moves and the indexes of insertions are relative to the new array.
  */
@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 
  * Applies the changes represented by this object to the given array:
- * - `newItemBlock` block should be able to create a new item from a corresponding item of the new array;
+ * - `newItemBlock` should be able to create a new item for the "old array" from a corresponding item of the new array;
  * - the optional `updateBlock` is called to modify an old item based on the corresponding item from the new array;
  * - the optional `removalBlock` is called for every item being removed (after it is removed from the array but before
  *   new items are added or moves made).
@@ -86,6 +86,19 @@ NS_ASSUME_NONNULL_BEGIN
 	newArray:(NSArray *)newArray
 	newItemBlock:(id (NS_NOESCAPE ^)(NewItemType newItem))newItemBlock
 	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock;
+
+/**
+ * Replays updates corresponding to the changes represented by the receiver onto `UITableView`.
+ *
+ * - `indexPathForRow` should be able to return an index path corresponding to the index of the element in the "old array".
+ *
+ * Note that updates without actual movement (updates where old and new indexes are the same) are not applied.
+ * You can apply them yourself in another begin/endUpdates block using reload.
+ */
+- (void)applyToTableView:(UITableView *)tableView
+	indexPathForItemIndexBlock:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndexBlock
+	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
+	insertionAnimation:(UITableViewRowAnimation)insertionAnimation;
 
 #pragma mark -
 

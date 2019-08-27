@@ -307,6 +307,42 @@ typedef id OldItemType;
 	}
 }
 
+- (void)applyToTableView:(UITableView *)tableView
+	indexPathForItemIndexBlock:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndexBlock
+	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
+	insertionAnimation:(UITableViewRowAnimation)insertionAnimation
+{
+	if (self.empty)
+		return;
+
+	// The order is very important here: 1) deletions, 2) insertions, 3) moves.
+
+	[tableView beginUpdates];
+
+	NSMutableArray *removalsIndexPaths = [[NSMutableArray alloc] initWithCapacity:_removals.count];
+	for (MMMArrayChangesRemoval *r in _removals) {
+		[removalsIndexPaths addObject:indexPathForItemIndexBlock(r.index)];
+	}
+	[tableView deleteRowsAtIndexPaths:removalsIndexPaths withRowAnimation:deletionAnimation];
+
+	NSMutableArray *insertionsIndexPaths = [[NSMutableArray alloc] initWithCapacity:_insertions.count];
+	for (MMMArrayChangesInsertion *i in _insertions) {
+		[insertionsIndexPaths addObject:indexPathForItemIndexBlock(i.index)];
+	}
+	[tableView insertRowsAtIndexPaths:insertionsIndexPaths withRowAnimation:insertionAnimation];
+
+	for (MMMArrayChangesUpdate *update in _updates) {
+		if (update.oldIndex != update.newIndex) {
+			[tableView
+				moveRowAtIndexPath:indexPathForItemIndexBlock(update.oldIndex)
+				toIndexPath:indexPathForItemIndexBlock(update.newIndex)
+			];
+		}
+	}
+	
+	[tableView endUpdates];
+}
+
 @end
 
 
