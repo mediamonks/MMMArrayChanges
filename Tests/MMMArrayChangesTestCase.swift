@@ -6,36 +6,37 @@
 import XCTest
 import MMMArrayChanges
 
-// Let say we have a list of rich (or "thick", as opposed to "anemic" https://martinfowler.com/bliki/AnemicDomainModel.html)
-// models for cookies. This is a sketch for a single element of such a "thick" list.
-class CookieModel {
+// Let say we have a list of rich (as opposed to [anemic](https://martinfowler.com/bliki/AnemicDomainModel.html))
+// models for cookies. This is a sketch for a single element of such a list.
+private class Cookie {
 
 	public let id: String
 
 	public private(set) var name: String
 
-	// For a rich model a corresponding plain API-domain object is just a single item among other things.
 	internal init(
 		apiModel: CookieFromAPI
+		// ... for a rich model a corresponding plain API-domain object is just a single item among other things here.
 	) {
 		self.id = "\(apiModel.id)"
 		self.name = apiModel.name
-		// ... more things here, like the parent list of cookies objects which knows about favorite cookies, etc.
+		// ... more properties initialized here, like the parent list of cookies which knows about favorites, etc.
 	}
 
 	// When we get a list of fresh cookies from the backend there should be a way to update our "thick" models without
-	// recreating it and requiring observers to resubscribe.
+	// recreating them and/or requiring their own observers to resubscribe.
 	internal func update(apiModel: CookieFromAPI) {
 		assert(self.id == "\(apiModel.id)", "It has to be a matching object from the API domain")
 		self.name = apiModel.name
 		// ... other fields.
-		// ... calls observers only if any fields have changed here.
+		// ... notify observers only if any fields have changed.
 	}
 
-	// ... there can be more than one way of updating this model.
+	// ... there can be more than one way of updating this model of course.
 
-	// In the actual app this kind of model would allow to be observed, so when the name of the cookie is edited
-	// on the backend, for example, then somebody could get a change by observing a single cookie object:
+	// This kind of model would allow itself to be observed, so when the name of the cookie is edited on the backend,
+	// for example, then somebody like a corresponding table view cell (or its view model) could get this change
+	// by observing a single cookie object:
 
 	public func addObserver(_ observer: CookieModelObserver) {}
 	public func removeObserver(_ observer: CookieModelObserver) {}
@@ -48,8 +49,8 @@ class CookieModel {
 		return false
 	}
 
-	// It's useful sometimes to mark a model as deleted/detached as somebody still might have a reference to it after
-	// it's gone from the main list (like a view somewhere forgotten to be hidden or being animated out of the screen).
+	// It's useful to mark a model as deleted/detached as somebody still might have a reference to it after it's gone
+	// from the main list (like a view somewhere being animated out of the screen or forgotten to be hidden).
 	public private(set) var isRemoved: Bool = false
 
 	public func markAsRemoved() {
@@ -59,12 +60,13 @@ class CookieModel {
 	}
 }
 
-protocol CookieModelObserver {
-	func cookieDidChange()
+private protocol CookieModelObserver {
+	func cookieDidChange(cookie: Cookie)
+	// ...
 }
 
 // And this is something plain and simple from the "API domain".
-struct CookieFromAPI {
+private struct CookieFromAPI {
 	let id: Int
 	let name: String
 }
@@ -74,7 +76,7 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 	func testDiffMapBasics() {
 
 		// Imagine we are somewhere in a "thick" model representing a list of cookies.
-		var items: [CookieModel] = []
+		var items: [Cookie] = []
 
 		// And we've got our first ever update from the backend.
 		let apiResponse: [CookieFromAPI] = [
@@ -83,40 +85,54 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		]
 
 		// We could simply recreate all our items and notify our observers (i.e. observers of the list itself).
-		items = apiResponse.map { (plainCookie) -> CookieModel in
-			return CookieModel(apiModel: plainCookie)
+		items = apiResponse.map { (plainCookie) -> Cookie in
+			return Cookie(apiModel: plainCookie)
 		}
 
 		// ... notify observers about the whole list updated.
 
+		// (Let's grab just for comparison below.)
+		let almondCookie = items[0]
+		let animalCracker = items[1]
+
 		// However if (almost) nothing has changed in the list, then it would be nicer (performance-wise and very often
-		// visually), to nofity only the observers of updated cookies, like "Almond biscuit"'s in this case,
-		// however using our simple map() would recreate the whole list.
+		// visually), to nofity only the observers of updated cookies, like "Almond biscuit"'s in this case:
 		let apiResponse2: [CookieFromAPI] = [
 			CookieFromAPI(id: 1, name: "Almond cookie"),
 			CookieFromAPI(id: 2, name: "Animal cracker")
 		]
 
-		let updatedCookie = items[0] // Just to compare below
-
-		// So let's use diffMap() (in a function to reuse in this test):
+		// Using our simple map() would recreate the whole list however, so let's try diffMap()
+		// (which is wrapped into a function here to reuse it later in this test).
 		self.diffMap(items: &items, apiResponse: apiResponse2)
 
-		XCTAssert(items[0] === updatedCookie, "The object reference is supposed to stay the same")
-		XCTAssert(items[0].name == "Almond cookie", "While properties should update")
+		XCTAssert(items[0] === almondCookie && items[1] === animalCracker, "The object references are supposed to stay the same")
+		XCTAssert(items[0].name == "Almond cookie", "While properties might update")
+
+		// OK, let's add/remove elements:
+		let apiResponse3: [CookieFromAPI] = [
+			CookieFromAPI(id: 2, name: "Animal cracker"),
+			CookieFromAPI(id: 3, name: "Oreo")
+		]
+		self.diffMap(items: &items, apiResponse: apiResponse3)
+
+		XCTAssert(items.count == 2 && almondCookie.isRemoved, "Almond cookie is gone")
+		XCTAssert(items[0] === animalCracker, "Animal cracker is exactly the same object")
+		XCTAssert(items[1].name == "Oreo", "And there is a new cookie")
 	}
 
-	func diffMap(items: inout [CookieModel], apiResponse: [CookieFromAPI]) {
+	private func diffMap(items: inout [Cookie], apiResponse: [CookieFromAPI]) {
+
 		items = items.diffMap(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
 			elementId: { cookie -> String in cookie.id },
 			sourceArray: apiResponse,
 			// We decided to use the same IDs that are used by the models, i.e. string ones.
 			sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
-			added: { (apiModel) -> CookieModel in
+			added: { (apiModel) -> Cookie in
 				// Called for every plain API object that has no corresponding "thick" cookie model yet,
 				// i.e. for every new cookie. We create new "thick" models only for those.
-				return CookieModel(apiModel: apiModel)
+				return Cookie(apiModel: apiModel)
 			},
 			updated: { (cookie, apiCookie) in
 				// Called for every cookie model that still has a corresponding plain object in the API response.
