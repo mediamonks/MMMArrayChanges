@@ -12,6 +12,13 @@
 
 @implementation MMMArrayChangesTestCase
 
+- (void)testBasics {
+	// `MMMArrayChanges` class can also be used to find differences between two arrays.
+	// It should be slower than `diffMap()`, but it plays well with ObjC and all the changes reported are compatible
+	// with what `UITableView` expects between beginUpdates()/endUpdates() (information about movemenets
+	// of elements is also generated).
+}
+
 - (void)verifyApplyWithOldArray:(NSArray *)oldArray newArray:(NSArray *)newArray {
 
 	MMMArrayChanges *changes = [MMMArrayChanges

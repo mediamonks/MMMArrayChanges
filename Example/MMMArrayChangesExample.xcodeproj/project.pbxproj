@@ -7,28 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5BCD82E1C0CD62F328313186 /* libPods-MMMArrayChangesExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E54DA9DEF34994B8D2B11645 /* libPods-MMMArrayChangesExample.a */; };
+		374644BF0D396DD40F66EDC0 /* libPods-MMMArrayChangesExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 65E2B5CFB2073597422219B3 /* libPods-MMMArrayChangesExample.a */; };
 		F291C0D2231447CC00C79729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0D1231447CC00C79729 /* AppDelegate.swift */; };
-		F291C0D4231447CC00C79729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0D3231447CC00C79729 /* ViewController.swift */; };
-		F291C0D7231447CC00C79729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F291C0D5231447CC00C79729 /* Main.storyboard */; };
 		F291C0D9231447CD00C79729 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F291C0D8231447CD00C79729 /* Assets.xcassets */; };
 		F291C0DC231447CD00C79729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F291C0DA231447CD00C79729 /* LaunchScreen.storyboard */; };
+		F291C0F42315565500C79729 /* CookieListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0F32315565500C79729 /* CookieListViewController.swift */; };
+		F291C0F6231561CC00C79729 /* CookieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0F5231561CC00C79729 /* CookieViewModel.swift */; };
+		F291C0F8231566EE00C79729 /* CookieList.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0F7231566EE00C79729 /* CookieList.swift */; };
+		F291C0FA23156DF000C79729 /* PseudoRandomSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = F291C0F923156DF000C79729 /* PseudoRandomSequence.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2818FAE06E6E34B05D0ED7FB /* Pods-MMMArrayChangesExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MMMArrayChangesExampleTests.release.xcconfig"; path = "Target Support Files/Pods-MMMArrayChangesExampleTests/Pods-MMMArrayChangesExampleTests.release.xcconfig"; sourceTree = "<group>"; };
+		65E2B5CFB2073597422219B3 /* libPods-MMMArrayChangesExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MMMArrayChangesExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		734C3CBAC60487240587283C /* Pods-MMMArrayChangesExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MMMArrayChangesExample.debug.xcconfig"; path = "Target Support Files/Pods-MMMArrayChangesExample/Pods-MMMArrayChangesExample.debug.xcconfig"; sourceTree = "<group>"; };
-		839F295F9CC91C26F677EF29 /* Pods-MMMArrayChangesExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MMMArrayChangesExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-MMMArrayChangesExampleTests/Pods-MMMArrayChangesExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
-		AB321D0B8403CA743B4419C0 /* libPods-MMMArrayChangesExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MMMArrayChangesExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF207FEFD20B950F6044C460 /* Pods-MMMArrayChangesExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MMMArrayChangesExample.release.xcconfig"; path = "Target Support Files/Pods-MMMArrayChangesExample/Pods-MMMArrayChangesExample.release.xcconfig"; sourceTree = "<group>"; };
-		E54DA9DEF34994B8D2B11645 /* libPods-MMMArrayChangesExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MMMArrayChangesExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F291C0CE231447CC00C79729 /* MMMArrayChangesExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MMMArrayChangesExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F291C0D1231447CC00C79729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		F291C0D3231447CC00C79729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		F291C0D6231447CC00C79729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F291C0D8231447CD00C79729 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F291C0DB231447CD00C79729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F291C0DD231447CD00C79729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F291C0F32315565500C79729 /* CookieListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CookieListViewController.swift; sourceTree = "<group>"; };
+		F291C0F5231561CC00C79729 /* CookieViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieViewModel.swift; sourceTree = "<group>"; };
+		F291C0F7231566EE00C79729 /* CookieList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieList.swift; sourceTree = "<group>"; };
+		F291C0F923156DF000C79729 /* PseudoRandomSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PseudoRandomSequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5BCD82E1C0CD62F328313186 /* libPods-MMMArrayChangesExample.a in Frameworks */,
+				374644BF0D396DD40F66EDC0 /* libPods-MMMArrayChangesExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,8 +47,7 @@
 		3EB6DA53EC5D2527BC7A3C37 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E54DA9DEF34994B8D2B11645 /* libPods-MMMArrayChangesExample.a */,
-				AB321D0B8403CA743B4419C0 /* libPods-MMMArrayChangesExampleTests.a */,
+				65E2B5CFB2073597422219B3 /* libPods-MMMArrayChangesExample.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -57,8 +57,6 @@
 			children = (
 				734C3CBAC60487240587283C /* Pods-MMMArrayChangesExample.debug.xcconfig */,
 				BF207FEFD20B950F6044C460 /* Pods-MMMArrayChangesExample.release.xcconfig */,
-				839F295F9CC91C26F677EF29 /* Pods-MMMArrayChangesExampleTests.debug.xcconfig */,
-				2818FAE06E6E34B05D0ED7FB /* Pods-MMMArrayChangesExampleTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -85,11 +83,13 @@
 			isa = PBXGroup;
 			children = (
 				F291C0D1231447CC00C79729 /* AppDelegate.swift */,
-				F291C0D3231447CC00C79729 /* ViewController.swift */,
-				F291C0D5231447CC00C79729 /* Main.storyboard */,
 				F291C0D8231447CD00C79729 /* Assets.xcassets */,
-				F291C0DA231447CD00C79729 /* LaunchScreen.storyboard */,
+				F291C0F7231566EE00C79729 /* CookieList.swift */,
+				F291C0F32315565500C79729 /* CookieListViewController.swift */,
+				F291C0F5231561CC00C79729 /* CookieViewModel.swift */,
 				F291C0DD231447CD00C79729 /* Info.plist */,
+				F291C0DA231447CD00C79729 /* LaunchScreen.storyboard */,
+				F291C0F923156DF000C79729 /* PseudoRandomSequence.swift */,
 			);
 			path = MMMArrayChangesExample;
 			sourceTree = "<group>";
@@ -155,7 +155,6 @@
 			files = (
 				F291C0DC231447CD00C79729 /* LaunchScreen.storyboard in Resources */,
 				F291C0D9231447CD00C79729 /* Assets.xcassets in Resources */,
-				F291C0D7231447CC00C79729 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,7 +190,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F291C0D4231447CC00C79729 /* ViewController.swift in Sources */,
+				F291C0FA23156DF000C79729 /* PseudoRandomSequence.swift in Sources */,
+				F291C0F42315565500C79729 /* CookieListViewController.swift in Sources */,
+				F291C0F8231566EE00C79729 /* CookieList.swift in Sources */,
+				F291C0F6231561CC00C79729 /* CookieViewModel.swift in Sources */,
 				F291C0D2231447CC00C79729 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -199,14 +201,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		F291C0D5231447CC00C79729 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F291C0D6231447CC00C79729 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		F291C0DA231447CD00C79729 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
