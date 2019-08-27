@@ -2,9 +2,13 @@
 
 iOS library that helps finding (UITableView-compatible) differences between two lists, possibly of different types.
 
-(This is a part of MediaMonks' `MMMTemple` suite of iOS libraries.)
+(This is a part of `MMMTemple` suite of iOS libraries we use at [MediaMonks](https://www.mediamonks.com/).)
 
 ## Example
+
+See `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView` properly.
+
+### diffMap()
 
 (See `./Tests/MMMArrayChangesTestCase.swift` for a more complete one.)
 
@@ -67,6 +71,8 @@ Enter `MMMArrayChanges` (ObjC-friendly and `UITableView`-compatible) or, for a s
 
 ## TODO
 
-Example for `UITableView`-compatible changes and application of them to a `UITableView`.
+- `MMMArrayChanges`: rename methods for Swift.
+- `MMMArrayChanges`: get rid of a mutable array requirement in the Swift version of `apply(to:...)`.
+- Add a version of `diffMap()` that's not applying changes right away but ony reports them?
 
 ---
