@@ -307,13 +307,13 @@ typedef id OldItemType;
 	}
 }
 
-- (void)applyToTableView:(UITableView *)tableView
-	indexPathForItemIndexBlock:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndexBlock
+- (NSArray<NSIndexPath *> *)applyToTableView:(UITableView *)tableView
+	indexPathForItemIndex:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndex
 	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
-	insertionAnimation:(UITableViewRowAnimation)insertionAnimation
+	insertionAnimation:(UITableViewRowAnimation)insertionAnimation;
 {
 	if (self.empty)
-		return;
+		return @[];
 
 	// The order is very important here: 1) deletions, 2) insertions, 3) moves.
 
@@ -321,26 +321,31 @@ typedef id OldItemType;
 
 	NSMutableArray *removalsIndexPaths = [[NSMutableArray alloc] initWithCapacity:_removals.count];
 	for (MMMArrayChangesRemoval *r in _removals) {
-		[removalsIndexPaths addObject:indexPathForItemIndexBlock(r.index)];
+		[removalsIndexPaths addObject:indexPathForItemIndex(r.index)];
 	}
 	[tableView deleteRowsAtIndexPaths:removalsIndexPaths withRowAnimation:deletionAnimation];
 
 	NSMutableArray *insertionsIndexPaths = [[NSMutableArray alloc] initWithCapacity:_insertions.count];
 	for (MMMArrayChangesInsertion *i in _insertions) {
-		[insertionsIndexPaths addObject:indexPathForItemIndexBlock(i.index)];
+		[insertionsIndexPaths addObject:indexPathForItemIndex(i.index)];
 	}
 	[tableView insertRowsAtIndexPaths:insertionsIndexPaths withRowAnimation:insertionAnimation];
 
+	NSMutableArray *reloadsIndexPaths = [[NSMutableArray alloc] initWithCapacity:_updates.count];
 	for (MMMArrayChangesUpdate *update in _updates) {
 		if (update.oldIndex != update.newIndex) {
 			[tableView
-				moveRowAtIndexPath:indexPathForItemIndexBlock(update.oldIndex)
-				toIndexPath:indexPathForItemIndexBlock(update.newIndex)
+				moveRowAtIndexPath:indexPathForItemIndex(update.oldIndex)
+				toIndexPath:indexPathForItemIndex(update.newIndex)
 			];
+		} else {
+			[reloadsIndexPaths addObject:indexPathForItemIndex(update.newIndex)];
 		}
 	}
 	
 	[tableView endUpdates];
+
+	return reloadsIndexPaths;
 }
 
 @end

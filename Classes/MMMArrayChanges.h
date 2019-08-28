@@ -79,24 +79,34 @@ NS_ASSUME_NONNULL_BEGIN
 	newArray:(NSArray<NewItemType> *)newArray
 	newItemBlock:(id (NS_NOESCAPE ^)(NewItemType newItem))newItemBlock
 	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock
-	removalBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem))removalBlock;
+	removalBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem))removalBlock
+		NS_SWIFT_UNAVAILABLE("In Swift use Array.apply<>(changes:newArray:transform:update:remove:) instead");
 
 /** A shortcut for the above method without the removalBlock. */
 - (void)applyToArray:(NSMutableArray *)oldArray
 	newArray:(NSArray *)newArray
 	newItemBlock:(id (NS_NOESCAPE ^)(NewItemType newItem))newItemBlock
-	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock;
+	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock
+		NS_SWIFT_UNAVAILABLE("In Swift use Array.apply<>(changes:newArray:transform:update:) instead");
 
 /**
  * Replays updates corresponding to the changes represented by the receiver onto `UITableView`.
  *
- * - `indexPathForRow` should be able to return an index path corresponding to the index of the element in the "old array".
+ * @param indexPathForItemIndex A block that can return an index path corresponding to the index of the element
+ * either in the new or the old arrays. I.e. it can only customize the section or provide fixed shift of the row index.
  *
- * Note that updates without actual movement (updates where old and new indexes are the same) are not applied.
- * You can apply them yourself in another begin/endUpdates block using reload.
+ * Updates without actual movements (updates where old and new indexes are the same) are not applied here, because:
+ *
+ * 1) The refresh of the contents of cells is normally handled by the cells themeselves observing
+ *    the corresponding view models.
+ *
+ * 2) Reloads cannot be requested within the same begin/endUpdate() transaction anyway.
+ *
+ * The index paths of such 'updated' but not moved cells are returned so you could still reload them if needed
+ * (one case would be if your updated cells might change their height).
  */
-- (void)applyToTableView:(UITableView *)tableView
-	indexPathForItemIndexBlock:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndexBlock
+- (NSArray<NSIndexPath *> *)applyToTableView:(UITableView *)tableView
+	indexPathForItemIndex:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndex
 	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
 	insertionAnimation:(UITableViewRowAnimation)insertionAnimation;
 
@@ -116,7 +126,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MMMArrayChangesRemoval : NSObject
 
-/** The index of the object being removed in the old array. */
+/** The index of the object being removed in the *old* array. */
 @property (nonatomic, readonly) NSInteger index;
 
 - (id)initWithIndex:(NSInteger)index NS_DESIGNATED_INITIALIZER;
@@ -130,7 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MMMArrayChangesInsertion : NSObject
 
-/** The index of the inserted object in the new array. */
+/** The index of the inserted object in the *new* array. */
 @property (nonatomic, readonly) NSInteger index;
 
 - (id)initWithIndex:(NSInteger)index NS_DESIGNATED_INITIALIZER;
@@ -140,14 +150,14 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /** 
- * To represent an object at source index being moved into a place with the target index. 
+ * To represent an object at source index being moved into a place with the target index.
  */
 @interface MMMArrayChangesMove : NSObject
 
-/** The index of the object being moved in the old array. */
+/** The index of the object being moved in the *old* array. */
 @property (nonatomic, readonly) NSInteger oldIndex;
 
-/** The index of the object being moved in the new array. */
+/** The index of the object being moved in the *new* array. */
 @property (nonatomic, readonly) NSInteger newIndex;
 
 /** @{ */
@@ -177,10 +187,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MMMArrayChangesUpdate : NSObject
 
-/** The index of the changed object in the old array. */
+/** The index of the changed object in the *old* array. */
 @property (nonatomic, readonly) NSInteger oldIndex;
 
-/** The index of the changed object in the new array. */
+/** The index of the changed object in the *new* array. */
 @property (nonatomic, readonly) NSInteger newIndex;
 
 - (id)initWithOldIndex:(NSInteger)oldIndex newIndex:(NSInteger)newIndex NS_DESIGNATED_INITIALIZER;

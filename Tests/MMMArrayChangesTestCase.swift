@@ -104,7 +104,7 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 
 		// Using our simple map() would recreate the whole list however, so let's try diffMap()
 		// (which is wrapped into a function here to reuse it later in this test).
-		self.diffMap(items: &items, apiResponse: apiResponse2)
+		self.diffUpdate(items: &items, apiResponse: apiResponse2)
 
 		XCTAssert(items[0] === almondCookie && items[1] === animalCracker, "The object references are supposed to stay the same")
 		XCTAssert(items[0].name == "Almond cookie", "While properties might update")
@@ -114,32 +114,32 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 			CookieFromAPI(id: 2, name: "Animal cracker"),
 			CookieFromAPI(id: 3, name: "Oreo")
 		]
-		self.diffMap(items: &items, apiResponse: apiResponse3)
+		self.diffUpdate(items: &items, apiResponse: apiResponse3)
 
 		XCTAssert(items.count == 2 && almondCookie.isRemoved, "Almond cookie is gone")
 		XCTAssert(items[0] === animalCracker, "Animal cracker is exactly the same object")
 		XCTAssert(items[1].name == "Oreo", "And there is a new cookie")
 	}
 
-	private func diffMap(items: inout [Cookie], apiResponse: [CookieFromAPI]) {
+	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) {
 
-		items = items.diffMap(
+		items.diffUpdate(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
 			elementId: { cookie -> String in cookie.id },
-			sourceArray: apiResponse,
+			newArray: apiResponse,
 			// We decided to use the same IDs that are used by the models, i.e. string ones.
-			sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
-			added: { (apiModel) -> Cookie in
+			newElementId: { plainCookie -> String in "\(plainCookie.id)" },
+			transform: { (apiModel) -> Cookie in
 				// Called for every plain API object that has no corresponding "thick" cookie model yet,
 				// i.e. for every new cookie. We create new "thick" models only for those.
 				return Cookie(apiModel: apiModel)
 			},
-			updated: { (cookie, apiCookie) in
+			update: { (cookie, apiCookie) in
 				// Called for every cookie model that still has a corresponding plain object in the API response.
 				// Let's update the fields we are interested in and notify observers only when needed.
 				cookie.update(apiModel: apiCookie)
 			},
-			removed: { (cookie) in
+			remove: { (cookie) in
 				// Called for all cookies that don't have matching plain objects in the backend response.
 				// Let's just mark them as removed just in case somebody holds a reference to them a bit longer than
 				// needed and might appreciate knowing that the object they hold is not in the main list anymore.

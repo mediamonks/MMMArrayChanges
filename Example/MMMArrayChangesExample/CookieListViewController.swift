@@ -73,47 +73,49 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 
 		} else {
 
-			if let lastUpdated = lastUpdated, -lastUpdated.timeIntervalSinceNow < 0.5 {
-				// Not enough time passed since the last update, the animation can be still in progress.
-				// We don't know how much time it usually takes, thus 0.5 seconds here.
-				// Let's reschedule the update for some time later to not interfere with the current one.
-				updateTimer = Timer.scheduledTimer(
-					withTimeInterval: 0.1, // Can calculate this more precisely of course.
-					repeats: false,
-					block: { [weak self] _ in
-						self?.updateViewModel()
-					}
-				)
-				return
-			}
-
-			updateTimer?.invalidate()
-			updateTimer = nil
-
 			// A version using MMMArrayChanges that:
 			// 1) keeps instances of view model objects for the same model items;
 			// 2) supports animated updates properly.
+
+			do {
+				// See if enough time has passed since the last update, as the animation can be still in progress
+				// and we don't want to disturb it.
+				// We don't know how much time it usually takes, thus 1 second here.
+				if let lastUpdated = lastUpdated, -lastUpdated.timeIntervalSinceNow < 1 {
+					// Let's reschedule the update for some time later to not interfere with the current one.
+					updateTimer = Timer.scheduledTimer(
+						withTimeInterval: 0.1, // Can calculate this more precisely of course.
+						repeats: false,
+						block: { [weak self] _ in
+							self?.updateViewModel()
+						}
+					)
+					return
+				}
+
+				updateTimer?.invalidate()
+				updateTimer = nil
+			}
 
 			let changes = MMMArrayChanges<CookieViewModel, CookieList.Cookie>(
 				oldArray: cookieList, idFromItemBlock: { $0.id },
 				newArray: model.items, idFromItemBlock: { "\($0.id)" },
 				comparisonBlock: { (cookieViewModel, cookie) -> Bool in
 					// We can check what's new here or we can simply return `false` to let the `update`
-					// block in the apply() call below called.
+					// block in the apply() call below called for every element that's till here
+					// and let it decide on what's new and wheather or not observers should be called.
 					return cookieViewModel.name == cookie.name
 				}
 			)
 
-			// TODO: fix this for Swift
-			let tempCookieList = NSMutableArray(array: cookieList)
-			changes.apply(
-				to: tempCookieList, newArray: model.items,
-				newItemBlock: { CookieViewModel(model: $0) },
+			cookieList.apply(
+				changes: changes,
+				newArray: model.items,
+				transform: { CookieViewModel(model: $0) },
 				update: { (cookiewViewModel, cookie) in
 					cookiewViewModel.update(model: cookie)
 				}
 			)
-			cookieList = tempCookieList as! [CookieViewModel]
 
 			assert(
 				cookieList.map { $0.id } == model.items.map { "\($0.id)" },
@@ -122,7 +124,9 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 
 			changes.apply(
 				to: view.tableView,
-				indexPathForItemIndexBlock: { IndexPath(row: $0, section: 0) },
+				indexPathForItemIndex: {
+					IndexPath(row: $0, section: 0)
+				},
 				deletionAnimation: .right,
 				insertionAnimation: .left
 			)
