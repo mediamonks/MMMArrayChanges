@@ -22,7 +22,7 @@ And we've got our first ever update:
     	CookieFromAPI(id: 1, name: "Oreo"),
     	CookieFromAPI(id: 2, name: "Butter cookie"),
     	CookieFromAPI(id: 3, name: "Almond biscuit"),
-        // ...
+    	// ...
     ]
 
 Note that `CookieModel` objects in our list model are [fat](https://martinfowler.com/bliki/AnemicDomainModel.html) and provide lots of extra functionality, while our `CookieFromAPI` are plain and simple structures coming directly from the API layer.
@@ -40,7 +40,7 @@ visually), to nofity only the observers of updated cookies, like "Almond biscuit
     	CookieFromAPI(id: 3, name: "Almond cake"), // <-- changed name
     	CookieFromAPI(id: 2, name: "Butter cookie"),
         CookieFromAPI(id: 4, name: "Biscotti")
-        // ...
+    	// ...
     ]
 
 Simple `map()` would not be enough and we would need to figure our which cookies in our API response correspond to which cookies in our current list. We would also need to handle new cookies and the ones that are not in the list anymore. Also, in case such a list is also linked to a `UITableView`, then we would need to generate updates/animations without breaking it (something that's quite hard to do in case of multi-item updates).
