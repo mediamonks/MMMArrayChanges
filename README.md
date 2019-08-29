@@ -46,7 +46,7 @@ visually), to nofity only the observers of updated cookies, like "Almond biscuit
 let apiResponse2: [CookieFromAPI] = [
 	CookieFromAPI(id: 3, name: "Almond cake"), // <-- changed name
 	CookieFromAPI(id: 2, name: "Butter cookie"),
-    CookieFromAPI(id: 4, name: "Biscotti")
+	CookieFromAPI(id: 4, name: "Biscotti")
 	// ...
 ]
 ```
