@@ -24,7 +24,7 @@ And we've got our first ever update:
 let apiResponse: [CookieFromAPI] = [
 	CookieFromAPI(id: 1, name: "Oreo"),
 	CookieFromAPI(id: 2, name: "Butter cookie"),
-    CookieFromAPI(id: 3, name: "Almond biscuit"),
+	CookieFromAPI(id: 3, name: "Almond biscuit"),
 	// ...
 ]
 ```
