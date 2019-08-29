@@ -30,7 +30,7 @@ extension Array where Element: AnyObject {
     	changes: MMMArrayChanges<Element, NewItemType>,
     	newArray: [NewItemType],
     	transform: (NewItemType) -> Element,
-    	update: ((Element, NewItemType) -> Void),
+    	update: ((Element, NewItemType) -> Void)? = nil,
     	remove: ((Element) -> Void)? = nil
 	) {
 
@@ -51,8 +51,10 @@ extension Array where Element: AnyObject {
 			self.insert(item, at: i.index)
 		}
 
-		for u in changes.updates {
-			update(self[u.newIndex], newArray[u.newIndex])
+		if let update = update {
+			for u in changes.updates {
+				update(self[u.newIndex], newArray[u.newIndex])
+			}
 		}
 	}
 }
@@ -106,8 +108,8 @@ extension Array where Element: AnyObject {
 		elementId: (Element) -> ElementId,
 		newArray: [SourceElement], newElementId: (SourceElement) -> ElementId,
 		transform: (SourceElement) -> Element,
-		update: (Element, SourceElement) -> Void,
-		remove: (Element) -> Void
+		update: ((Element, SourceElement) -> Void)? = nil,
+		remove: ((Element) -> Void)? = nil
 	) {
 
 		var index = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
@@ -116,7 +118,7 @@ extension Array where Element: AnyObject {
 			let id = newElementId(sourceElement)
 			if let element = index[id] {
 				index.removeValue(forKey: id)
-				update(element, sourceElement)
+				update?(element, sourceElement)
 				return element
 			} else {
 				return transform(sourceElement)
@@ -125,8 +127,10 @@ extension Array where Element: AnyObject {
 
 		self = result
 
-		index.forEach { (_, element) in
-			remove(element)
+		if let remove = remove {
+			index.forEach { (_, element) in
+				remove(element)
+			}
 		}
 	}
 }
