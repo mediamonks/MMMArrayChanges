@@ -4,9 +4,15 @@ iOS library that helps finding (UITableView-compatible) differences between two 
 
 (This is a part of `MMMTemple` suite of iOS libraries we use at [MediaMonks](https://www.mediamonks.com/).)
 
-Podfile (before this is released to a pods repo):
+## Installation
 
-	pod 'MMMArrayChanges', :git => 'https://github.com/mediamonks/MMMArrayChanges.git'
+Podfile:
+
+```
+source 'git@github.com:mediamonks/MMMTemple.git'	
+# ...
+pod 'MMMArrayChanges'
+```
 
 ## Quick Example
 
