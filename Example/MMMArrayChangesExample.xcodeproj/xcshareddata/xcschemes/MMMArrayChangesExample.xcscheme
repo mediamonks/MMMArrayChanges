@@ -32,19 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F291C0E1231447CD00C79729"
-               BuildableName = "MMMArrayChangesExampleTests.xctest"
-               BlueprintName = "MMMArrayChangesExampleTests"
-               ReferencedContainer = "container:MMMArrayChangesExample.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "531F43DDB02C07531834E8CBEDEBEF59"
-               BuildableName = "MMMArrayChanges-Unit-Tests.xctest"
-               BlueprintName = "MMMArrayChanges-Unit-Tests"
+               BlueprintIdentifier = "AAC9A1B361F784F27076A3A4F6453BBF"
+               BuildableName = "MMMArrayChanges-Unit-TestsSwift.xctest"
+               BlueprintName = "MMMArrayChanges-Unit-TestsSwift"
                ReferencedContainer = "container:Pods/Pods.xcodeproj">
             </BuildableReference>
          </TestableReference>

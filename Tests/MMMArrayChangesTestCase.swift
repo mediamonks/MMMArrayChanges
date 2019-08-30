@@ -73,7 +73,19 @@ private struct CookieFromAPI {
 
 class MMMArrayChangesTestCaseSwift : XCTestCase {
 
-	func testDiffMapBasics() {
+	func testBasics() {
+		XCTAssertEqual(
+			MMMArrayChanges(oldArray: [1, 2, 3], newArray: [3, 4, 2]),
+			MMMArrayChanges(
+				removals: [.init(0)],
+				insertions: [.init(1)],
+				moves: [.init(2, 0, 1, 0)],
+				updates: []
+			)
+		)
+	}
+
+	func testDiffUpdate() {
 
 		// Imagine we are somewhere in a "thick" model representing a list of cookies.
 		var items: [Cookie] = []

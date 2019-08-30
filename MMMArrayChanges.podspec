@@ -27,12 +27,11 @@ Pod::Spec.new do |s|
 	}	
 	s.subspec 'Swift' do |ss|
 		ss.source_files = [ 'Classes/*.swift' ]	
-		ss.dependency 'MMMArrayChanges/ObjC'
 	end
 
-	s.test_spec 'Tests' do |test_spec|
-		test_spec.source_files = 'Tests/*.{m,swift}'
+	s.test_spec 'TestsSwift' do |test_spec|
+		test_spec.source_files = 'Tests/*.swift'
 	end  	
-	
+
 	s.default_subspec = 'Swift'	
 end

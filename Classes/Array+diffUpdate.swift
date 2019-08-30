@@ -5,65 +5,10 @@
 
 extension Array where Element: AnyObject {
 
-    /**
-		Applies the difference between two arrays recorded via `MMMArrayChanges` to the receiver.
-
-		(A Swift version of `MMMArrayChanges.applyToArray`. Defining it on an `Array` instead of `MMMArrayChanges`
-		because the latter would not allow to use generic parameters, i.e. would get "Extension of a generic Objective-C
-		class cannot access the class's generic parameters at runtime" error in Swift 4.2.)
-
-		- Parameters:
-
-		  - changes: -
-
-		  - newArray: The array the changes were built with. (Keeping `newArray` name to be in line with the
-		    corresponding parameter of `MMMArrayChanges`.
-
-		  - transform: Creates a new element of the receiver from a corresponding item of the new array.
-
-     	  - update: Modifies an element of the receiver based on the corresponding item from the new array.
-
-     	  - remove: Optional closure that is called for every item removed after it is removed from the receiver
-     	    but before new items are added or moves are made.
-     */
-    public mutating func apply<NewItemType>(
-    	changes: MMMArrayChanges<Element, NewItemType>,
-    	newArray: [NewItemType],
-    	transform: (NewItemType) -> Element,
-    	update: ((Element, NewItemType) -> Void)? = nil,
-    	remove: ((Element) -> Void)? = nil
-	) {
-
-		for r in changes.removals {
-			let item = self[r.index]
-			self.remove(at: r.index)
-			remove?(item)
-		}
-
-		for m in changes.moves {
-			let item = self[m.intermediateSourceIndex]
-			self.remove(at: m.intermediateSourceIndex)
-			self.insert(item, at: m.intermediateTargetIndex)
-		}
-
-		for i in changes.insertions {
-			let item = transform(newArray[i.index])
-			self.insert(item, at: i.index)
-		}
-
-		if let update = update {
-			for u in changes.updates {
-				update(self[u.newIndex], newArray[u.newIndex])
-			}
-		}
-	}
-}
-
-extension Array where Element: AnyObject {
-
 	/**
+
 	Updates the receiver so it consists only of transformed elements from another array,
-	avoiding transformations for the elements that are already in the receiver along the way.
+	avoiding transformations for the elements that are already in the receiver.
 
 	This is similar to updating an existing array using `map()`:
 

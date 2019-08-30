@@ -97,19 +97,19 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 				updateTimer = nil
 			}
 
-			let changes = MMMArrayChanges<CookieViewModel, CookieList.Cookie>(
-				oldArray: cookieList, idFromItemBlock: { $0.id },
-				newArray: model.items, idFromItemBlock: { "\($0.id)" },
-				comparisonBlock: { (cookieViewModel, cookie) -> Bool in
+			let changes = MMMArrayChanges(
+				oldArray: cookieList, oldElementId: { $0.id },
+				newArray: model.items, newElementId: { "\($0.id)" },
+				hasUpdatedContents: { (cookieViewModel, cookie) -> Bool in
 					// We can check what's new here or we can simply return `false` to let the `update`
 					// block in the apply() call below called for every element that's till here
 					// and let it decide on what's new and wheather or not observers should be called.
-					return cookieViewModel.name == cookie.name
+					return cookieViewModel.name != cookie.name
 				}
 			)
 
-			cookieList.apply(
-				changes: changes,
+			changes.applyToArray(
+				&cookieList,
 				newArray: model.items,
 				transform: { CookieViewModel(model: $0) },
 				update: { (cookiewViewModel, cookie) in
@@ -122,13 +122,14 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 				"The view model array with changes replayed should have the same elements as the source array"
 			)
 
-			changes.apply(
-				to: view.tableView,
-				indexPathForItemIndex: {
-					IndexPath(row: $0, section: 0)
-				},
+			changes.applyToTableView(
+				view.tableView,
+				indexPathForItemIndex: { IndexPath(row: $0, section: 0) },
 				deletionAnimation: .right,
 				insertionAnimation: .left
+				// In our case we don't need to reload cells as they directly monitor the view models
+				// and their side does not need to change.
+				//~ reloadAnimation: .automatic
 			)
 
 			lastUpdated = Date()

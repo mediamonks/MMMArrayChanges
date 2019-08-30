@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
  * for moves are always relative to the old array without any changes perfomed on it yet, while the target indexes
  * for moves and the indexes of insertions are relative to the new array.
  */
+NS_SWIFT_UNAVAILABLE("Use the Swift port with the same name instead")
 @interface MMMArrayChanges <OldItemType : id, NewItemType : id> : NSObject
 
 /** 
@@ -80,14 +81,14 @@ NS_ASSUME_NONNULL_BEGIN
 	newItemBlock:(id (NS_NOESCAPE ^)(NewItemType newItem))newItemBlock
 	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock
 	removalBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem))removalBlock
-		NS_SWIFT_UNAVAILABLE("In Swift use Array.apply<>(changes:newArray:transform:update:remove:) instead");
+		NS_REFINED_FOR_SWIFT;
 
 /** A shortcut for the above method without the removalBlock. */
 - (void)applyToArray:(NSMutableArray *)oldArray
 	newArray:(NSArray *)newArray
 	newItemBlock:(id (NS_NOESCAPE ^)(NewItemType newItem))newItemBlock
 	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock
-		NS_SWIFT_UNAVAILABLE("In Swift use Array.apply<>(changes:newArray:transform:update:) instead");
+		NS_REFINED_FOR_SWIFT;
 
 /**
  * Replays updates corresponding to the changes represented by the receiver onto `UITableView`.
@@ -124,6 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 
  * To represent a removal of an old object. 
  */
+NS_SWIFT_UNAVAILABLE("")
 @interface MMMArrayChangesRemoval : NSObject
 
 /** The index of the object being removed in the *old* array. */
@@ -138,6 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 
  * To represent insertion of a new object.
  */
+NS_SWIFT_UNAVAILABLE("")
 @interface MMMArrayChangesInsertion : NSObject
 
 /** The index of the inserted object in the *new* array. */
@@ -152,6 +155,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 
  * To represent an object at source index being moved into a place with the target index.
  */
+NS_SWIFT_UNAVAILABLE("")
 @interface MMMArrayChangesMove : NSObject
 
 /** The index of the object being moved in the *old* array. */
@@ -185,6 +189,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * To describe objects that have changed.
  */
+NS_SWIFT_UNAVAILABLE("")
 @interface MMMArrayChangesUpdate : NSObject
 
 /** The index of the changed object in the *old* array. */
