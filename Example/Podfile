@@ -1,5 +1,5 @@
 platform :ios, '12.0'
 
 target 'MMMArrayChangesExample' do	
-	pod 'MMMArrayChanges', :path => '../', :testspecs => [ 'TestsSwift' ]
+	pod 'MMMArrayChanges', :subspecs => ['Swift', 'ObjC'], :path => '../', :testspecs => [ 'TestsSwift' ]
 end

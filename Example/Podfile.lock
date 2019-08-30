@@ -1,11 +1,11 @@
 PODS:
-  - MMMArrayChanges (0.1):
-    - MMMArrayChanges/Swift (= 0.1)
+  - MMMArrayChanges/ObjC (0.1)
   - MMMArrayChanges/Swift (0.1)
   - MMMArrayChanges/TestsSwift (0.1)
 
 DEPENDENCIES:
-  - MMMArrayChanges (from `../`)
+  - MMMArrayChanges/ObjC (from `../`)
+  - MMMArrayChanges/Swift (from `../`)
   - MMMArrayChanges/TestsSwift (from `../`)
 
 EXTERNAL SOURCES:
@@ -15,6 +15,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   MMMArrayChanges: e459bf8391e5c7b8abe441329312437661993161
 
-PODFILE CHECKSUM: 1ba19d85ed0a20661bc8b5676703272a9c1113b3
+PODFILE CHECKSUM: c6955bc9033cd07b06ef2a49f5388d04bb56ed5f
 
 COCOAPODS: 1.7.5

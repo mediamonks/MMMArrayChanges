@@ -3,20 +3,22 @@
 // Copyright (C) 2019 MediaMonks. All rights reserved.
 //
 
-/// Represents differences between two arrays with elements possibly of different types.
-///
-/// (`MMMArrayChanges` ported from ObjC for better performance and convenience. The ObjC version was unable to directly
-/// work with arrays of Swift protocols among other things.)
-///
-/// This is to help with detection of changes in a collection of items in general and in particular to have these changes
-/// compatible with expectations of `UITableView`.
-///
-/// A typical use case is when we sync a list of items with a backend periodically and want to properly animate all
-/// the changes in the table view using batch updates.
-///
-/// Note that in order to remain compatible with `UITableView` the indexes for removals and the source indexes
-/// for moves are always relative to the old array without any changes perfomed on it yet, while the target indexes
-/// for moves and the indexes of insertions are relative to the new array.
+/**
+Represents differences between two arrays with elements possibly of different types.
+
+(`MMMArrayChanges` ported from ObjC for better performance and convenience. The ObjC version was unable to directly
+work with arrays of Swift protocols among other things.)
+
+This is to help with detection of changes in a collection of items in general and in particular to have these changes
+compatible with expectations of `UITableView`.
+
+A typical use case is when we sync a list of items with a backend periodically and want to properly animate all
+the changes in the table view using batch updates.
+
+Note that in order to remain compatible with `UITableView` the indexes for removals and the source indexes
+for moves are always relative to the old array without any changes perfomed on it yet, while the target indexes
+for moves and the indexes of insertions are relative to the new array.
+*/
 public class MMMArrayChanges: CustomStringConvertible, Equatable {
 
 	public struct Removal: CustomStringConvertible, Equatable {
@@ -149,8 +151,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	  - update: Modifies an element from the `oldArray` based on the corresponding element from the `newArray`.
 
 	  - remove: Optional closure that is called for every item removed from the `oldArray` (after the removal
-	    but before adding new items or moving them).
-     */
+		but before adding new items or moving them).
+	*/
     public func applyToArray<OldElement, NewElement>(
     	_ oldArray: inout [OldElement],
     	newArray: [NewElement],
@@ -184,27 +186,26 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	}
 
 	/**
-		Replays updates represented by the receiver onto a `UITableView` within its own beginUpdates()/endUpdates() block.
+	Replays updates represented by the receiver onto a `UITableView` within its own beginUpdates()/endUpdates() block.
 
-		Updates without actual movements (i.e. where old and new indexes are the same) are applied as row reloads
-		only when `reloadAnimation` is non-`nil` because:
+	Updates without actual movements (i.e. where old and new indexes are the same) are applied as row reloads
+	only when `reloadAnimation` is non-`nil` because:
 
-		1) The refresh of the contents of cells is normally handled by the cells themeselves observing
-		the corresponding view models and an extra reload would be more expensive in this case and probably visually
-		worse.
+	1) The refresh of the contents of cells is normally handled by the cells themeselves observing
+	the corresponding view models and an extra reload would be more expensive in this case and probably visually
+	worse.
 
-		2) UITableView does not seem to be hadling well reloads within the same beginUpdate()/endUpdate() block.
+	2) UITableView does not seem to be hadling well reloads within the same beginUpdate()/endUpdate() block.
 
-		The index paths of such 'updated' but not moved cells are returned so you could still reload them if needed
-		(one case would be if your updated cells might change their height).
+	The index paths of such 'updated' but not moved cells are returned so you could still reload them if needed
+	(one case would be if your updated cells might change their height).
 
-		- Parameters:
-			- indexPathForItemIndex: A block that can return an index path corresponding to the index of the element
-				either in the new or the old arrays. I.e. it can only customize the section or provide fixed shift
-				of the row index.
-			- reloadAnimation: If non-nil, then updates without movemenet are applied as row reloads within
-				a separate beginUpdates()/endUpdates() block.
-
+	- Parameters:
+		- indexPathForItemIndex: A block that can return an index path corresponding to the index of the element
+			either in the new or the old arrays. I.e. it can only customize the section or provide fixed shift
+			of the row index.
+		- reloadAnimation: If non-nil, then updates without movemenet are applied as row reloads within
+			a separate beginUpdates()/endUpdates() block.
 	*/
 	public func applyToTableView(
 		_ tableView: UITableView,
@@ -241,6 +242,16 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 
 extension MMMArrayChanges {
 
+	/**
+	Finds UITableView-compatible differences between two arrays consisting of elements of different types.
+
+	The `oldElementId` and `newElementId` closures should be able to provide an ID that can be used to distiniguish
+	elements of the old and new arrays.
+
+	The `hasUpdatedContents` is called for items having the same IDs to figure out if any inner properties of the items
+	have changed enough to mark the corresponding item as "updated" (e.g. to require a reload of a corresponding
+	table view cell).
+	*/
 	public convenience init<OldElement, NewElement, ElementId: Hashable>(
 		oldArray: [OldElement], oldElementId: (OldElement) -> ElementId,
 		newArray: [NewElement], newElementId: (NewElement) -> ElementId,
@@ -379,7 +390,10 @@ extension MMMArrayChanges {
 	/// Simplified initializer for the case when elements of both arrays have same types and can work as their own IDs.
 	///
 	/// TODO: Later add another one for elements supporting `Identifiable` protocol.
-	public convenience init<Element: Hashable>(oldArray: [Element], newArray: [Element]) {
+	public convenience init<Element: Hashable>(
+		oldArray: [Element],
+		newArray: [Element]
+	) {
 		self.init(
 			oldArray: oldArray, oldElementId: { $0 },
 			newArray: newArray, newElementId: { $0 }
@@ -389,14 +403,23 @@ extension MMMArrayChanges {
 
 extension MMMArrayChanges {
 
-	/// Simplified initializer for the case when elements of both arrays have same reference types
-	/// i.e. `ObjectIdentifier` works well as their ID.
+	/// Simplified initializer for the cases when elements of both arrays have same reference types and are considered
+	/// same as long as their references are the same (i.e. `ObjectIdentifier` works well as their ID).
 	///
-	/// TODO: Later add another one for elements supporting `Identifiable` protocol.
-	public convenience init<Element: AnyObject>(oldArray: [Element], newArray: [Element]) {
+	/// - Parameter hasUpdated: Return `true`, if an update should be registered for the given object.
+	///    This is like `hasUpdatedContents` in the longer version of this initializer.
+	public convenience init<Element: AnyObject>(
+		oldArray: [Element],
+		newArray: [Element],
+		hasUpdated: ((Element) -> Bool)? = nil
+	) {
 		self.init(
 			oldArray: oldArray, oldElementId: { ObjectIdentifier($0) },
-			newArray: newArray, newElementId: { ObjectIdentifier($0) }
+			newArray: newArray, newElementId: { ObjectIdentifier($0) },
+			hasUpdatedContents: {
+				assert($0 === $1)
+				return hasUpdated?($0) ?? false
+			}
 		)
 	}
 }
