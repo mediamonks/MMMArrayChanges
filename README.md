@@ -70,15 +70,15 @@ items.diffUpdate(
 	newArray: apiResponse2,
 	// We decided to use the same IDs that are used by the models, i.e. string ones.
 	newElementId: { plainCookie -> String in "\(plainCookie.id)" },
-	transform: { (apiModel) -> CookieModel in
+	transform: { (plainCookie) -> CookieModel in
 		// This is called for every plain API object that has no corresponding "thick" cookie model yet,
 		// i.e. for every new cookie. We create new "thick" models only for those.
-		return CookieModel(apiModel: apiModel)
+		return CookieModel(plainCookie)
 	},
-	update: { (cookie, apiCookie) in
+	update: { (cookie, plainCookie) in
 		// Called for every cookie model that still has a corresponding plain object in the API response.
 		// Let's update the fields we are interested in and notify observers only when needed.
-		cookie.update(apiModel: apiCookie)
+		cookie.update(plainCookie)
 	},
 	remove: { (cookie) in
 		// Called for all cookies that don't have matching plain objects in the backend response.
@@ -88,5 +88,3 @@ items.diffUpdate(
 	}
 )
 ```
-
----
