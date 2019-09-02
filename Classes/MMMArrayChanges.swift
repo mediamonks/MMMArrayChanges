@@ -188,31 +188,24 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	/**
 	Replays updates represented by the receiver onto a `UITableView` within its own beginUpdates()/endUpdates() block.
 
-	Updates without actual movements (i.e. where old and new indexes are the same) are applied as row reloads
-	only when `reloadAnimation` is non-`nil` because:
-
-	1) The refresh of the contents of cells is normally handled by the cells themeselves observing
-	the corresponding view models and an extra reload would be more expensive in this case and probably visually
-	worse.
-
-	2) UITableView does not seem to be hadling well reloads within the same beginUpdate()/endUpdate() block.
-
-	The index paths of such 'updated' but not moved cells are returned so you could still reload them if needed
-	(one case would be if your updated cells might change their height).
+	In addition, if `reloadAnimation` is not `nil`, then cells corresponding to updated items are reloaded within their
+	own beginUpdates()/endUpdates() block. (This is optional, as normally the cells would monitor the
+	corresponding items directly and update themselves.)
 
 	- Parameters:
+	
 		- indexPathForItemIndex: A block that can return an index path corresponding to the index of the element
 			either in the new or the old arrays. I.e. it can only customize the section or provide fixed shift
 			of the row index.
-		- reloadAnimation: If non-nil, then updates without movemenet are applied as row reloads within
-			a separate beginUpdates()/endUpdates() block.
+
+		- reloadAnimation: If non-nil, then updates are applied as row reloads within a separate beginUpdates()/endUpdates() block.
 	*/
 	public func applyToTableView(
 		_ tableView: UITableView,
 		indexPathForItemIndex: (Int) -> IndexPath,
 		deletionAnimation: UITableView.RowAnimation,
 		insertionAnimation: UITableView.RowAnimation,
-		reloadAnimation: UITableView.RowAnimation? = nil
+		reloadAnimation: UITableView.RowAnimation?
 	) {
 		if isEmpty {
 			return
@@ -232,15 +225,14 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		tableView.endUpdates()
 
 		if let reloadAnimation = reloadAnimation {
-			tableView.reloadRows(
-				at: updates.filter { $0.oldIndex == $0.newIndex }.map{ indexPathForItemIndex($0.oldIndex) },
-				with: reloadAnimation
-			)
+			let rowsToReload = updates.map{ indexPathForItemIndex($0.newIndex) }
+			if !rowsToReload.isEmpty {
+				tableView.beginUpdates()
+				tableView.reloadRows(at: rowsToReload, with: reloadAnimation)
+				tableView.endUpdates()
+			}
 		}
 	}
-}
-
-extension MMMArrayChanges {
 
 	/**
 	Finds UITableView-compatible differences between two arrays consisting of elements of different types.
@@ -255,7 +247,7 @@ extension MMMArrayChanges {
 	public convenience init<OldElement, NewElement, ElementId: Hashable>(
 		oldArray: [OldElement], oldElementId: (OldElement) -> ElementId,
 		newArray: [NewElement], newElementId: (NewElement) -> ElementId,
-		hasUpdatedContents: ((OldElement, NewElement) -> Bool)? = nil
+		hasUpdatedContents: ((_ oldElement: OldElement, _ oldIndex: Int, _ newElement: NewElement, _ newIndex: Int) -> Bool)? = nil
 	) {
 		// TODO: it's a literal port from ObjC below, perhaps can improve this.
 
@@ -279,7 +271,7 @@ extension MMMArrayChanges {
 				var updates: [Update] = []
 				if let hasUpdatedContents = hasUpdatedContents {
 					for i in 0..<oldArray.count {
-						if hasUpdatedContents(oldArray[i], newArray[i]) {
+						if hasUpdatedContents(oldArray[i], i, newArray[i], i) {
 							updates.append(.init(i, i))
 						}
 					}
@@ -342,7 +334,7 @@ extension MMMArrayChanges {
 			if oldId == newId {
 
 				// The item is at its target position already, let's only check if the contents has updated.
-				if hasUpdatedContents?(oldItem, newItem) ?? false {
+				if hasUpdatedContents?(oldItem, oldIndex, newItem, newIndex) ?? false {
 					updates.append(.init(oldIndex, newIndex))
 				}
 
@@ -372,7 +364,7 @@ extension MMMArrayChanges {
 				intermediate.insert(t, at: intermediateTargetIndex)
 
 				// And finally check if the item has content changes as well.
-				if hasUpdatedContents?(oldArray[oldNewIndex], newItem) ?? false {
+				if hasUpdatedContents?(oldArray[oldNewIndex], oldNewIndex, newItem, newIndex) ?? false {
 					// Yes, record an update, too.
 					updates.append(.init(oldNewIndex, newIndex))
 				}
@@ -383,42 +375,36 @@ extension MMMArrayChanges {
 
 		self.init(removals: removals, insertions: insertions, moves: moves, updates: updates)
 	}
-}
-
-extension MMMArrayChanges {
 
 	/// Simplified initializer for the case when elements of both arrays have same types and can work as their own IDs.
 	///
 	/// TODO: Later add another one for elements supporting `Identifiable` protocol.
-	public convenience init<Element: Hashable>(
-		oldArray: [Element],
-		newArray: [Element]
-	) {
+	public convenience init<Element: Hashable>(oldArray: [Element], newArray: [Element]) {
 		self.init(
 			oldArray: oldArray, oldElementId: { $0 },
 			newArray: newArray, newElementId: { $0 }
 		)
 	}
-}
-
-extension MMMArrayChanges {
 
 	/// Simplified initializer for the cases when elements of both arrays have same reference types and are considered
 	/// same as long as their references are the same (i.e. `ObjectIdentifier` works well as their ID).
+	///
+	/// - Note: This wrapper does not compile well under Swift 4.2 when `Element` is a protocol.
+	/// TODO: check if this is still an issue in Swift 5
 	///
 	/// - Parameter hasUpdated: Return `true`, if an update should be registered for the given object.
 	///    This is like `hasUpdatedContents` in the longer version of this initializer.
 	public convenience init<Element: AnyObject>(
 		oldArray: [Element],
 		newArray: [Element],
-		hasUpdated: ((Element) -> Bool)? = nil
+		hasUpdatedContents: ((_ element: Element, _ oldIndex: Int, _ newIndex: Int) -> Bool)? = nil
 	) {
 		self.init(
 			oldArray: oldArray, oldElementId: { ObjectIdentifier($0) },
 			newArray: newArray, newElementId: { ObjectIdentifier($0) },
-			hasUpdatedContents: {
-				assert($0 === $1)
-				return hasUpdated?($0) ?? false
+			hasUpdatedContents: { (oldItem, oldIndex, newItem, newIndex) in
+				assert(oldItem === newItem)
+				return hasUpdatedContents?(oldItem, oldIndex, newIndex) ?? false
 			}
 		)
 	}
