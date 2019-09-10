@@ -458,9 +458,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		remove: (_ element: Element, _ oldIndex: Int) -> Void,
 		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
 	) -> MMMArrayChanges {
-		var tempArray = array
 		let result = byUpdatingArray(
-			&tempArray,
+			&array,
 			elementId: { (element) -> ObjectIdentifier in
 				return ObjectIdentifier(element)
 			},
@@ -472,7 +471,6 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			remove: remove,
 			transform: transform
 		)
-		array = tempArray
 		return result
 	}
 
@@ -485,9 +483,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
 		transform: ((_ newElement: Element, _ newIndex: Int) -> Element)? = nil
 	) -> MMMArrayChanges  {
-		var tempArray = array
 		let result = byUpdatingArray(
-			&tempArray,
+			&array,
 			elementId: { (_ element: Element) -> Element in
 				return element
 			},
@@ -495,17 +492,16 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			sourceElementId: { (_ sourceElement: Element) -> Element in
 				return sourceElement
 			},
-			update: update,
-			remove: remove,
+			update: { (element, oldIndex, sourceElement, newIndex) -> Bool in
+				return update?(element, oldIndex, sourceElement, newIndex) ?? false
+			},
+			remove: { (element, oldIndex) -> Void in
+				remove?(element, oldIndex)
+			},
 			transform: { (newElement, newIndex) -> Element in
-				if let transform = transform {
-					return transform(newElement, newIndex)
-				} else {
-					return newElement
-				}
+				return transform?(newElement, newIndex) ?? newElement
 			}
 		)
-		array = tempArray
 		return result
 	}
 }
