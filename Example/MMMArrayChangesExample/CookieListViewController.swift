@@ -52,9 +52,24 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 	// This is our list view model for the sake of this example, just a list of items we deal with directly in here.
 	private var cookieList: [CookieViewModel] = []
 
-	private var lastUpdated: Date?
+	private var newCookieListChanges: MMMArrayChanges?
+	private var newCookieList: [CookieViewModel] = []
+	private var lastReloaded: Date?
+	private var deferredUpdateTimer: Timer?
 
-	private var updateTimer: Timer?
+	// What kind of reload we were doing the last time updateViewModel() has been called.
+	private var reloadStage: ReloadStage = .none
+
+	private enum ReloadStage {
+		case none
+		case rowReloadsOnly
+		case otherUpdates
+	}
+
+	// We don't want to update the table view while animations are in progress, however we don't know how much time
+	// exactly the animations take, so this has to be something large enough, like 1s.
+	// Put something like 4 or 5 in case you are using slow animations on the simulator to see how things work.
+	private let tableViewAnimationDuration: TimeInterval = 1
 
 	private func updateViewModel() {
 
@@ -62,6 +77,24 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 			// It's quite possible that our observer is triggered before the view is loaded, we are subscribing quite early.
 			return
 		}
+
+		// Check if we're still waiting for the animations related to the previous update to complete.
+		if let lastReloaded = lastReloaded, -lastReloaded.timeIntervalSinceNow < tableViewAnimationDuration {
+
+			// Looks like so, let's reschedule, if needed, and get back to updates later.
+			if deferredUpdateTimer == nil {
+				deferredUpdateTimer = Timer.scheduledTimer(
+					withTimeInterval: max(0, tableViewAnimationDuration - (-lastReloaded.timeIntervalSinceNow)),
+					repeats: false,
+					block: { [weak self] _ in self?.updateViewModel() }
+				)
+			}
+			return
+
+		}
+
+		deferredUpdateTimer?.invalidate()
+		deferredUpdateTimer = nil
 
 		// Toggle this condition to compare basic and animated versions of updates.
 		if false {
@@ -75,64 +108,80 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 
 			// A version using MMMArrayChanges that:
 			// 1) keeps instances of view model objects for the same model items;
-			// 2) supports animated updates properly.
+			// 2) supports animated updates properly including mixed reloads and moves
+			//    (the latter requires a two stage process).
 
-			do {
-				// See if enough time has passed since the last update, as the animation can be still in progress
-				// and we don't want to disturb it.
-				// We don't know how much time it usually takes, thus 1 second here.
-				if let lastUpdated = lastUpdated, -lastUpdated.timeIntervalSinceNow < 1 {
-					// Let's reschedule the update for some time later to not interfere with the current one.
-					updateTimer = Timer.scheduledTimer(
-						withTimeInterval: 0.1, // Can calculate this more precisely of course.
-						repeats: false,
-						block: { [weak self] _ in
-							self?.updateViewModel()
-						}
-					)
-					return
+			switch reloadStage {
+			case .none, .otherUpdates:
+
+				print("---")
+				print("cookieList: \(cookieList)")
+				print("model.items: \(model.items)")
+
+				// Cannot modifie `cookieList` directly because of the two stage reload process.
+				newCookieList = cookieList
+				let changes = MMMArrayChanges.byUpdatingArray(
+					&newCookieList, elementId: { $0.id },
+					sourceArray: model.items, sourceElementId: { "\($0.id)" },
+					update: { (cookieViewModel, cookieViewModelIndex, cookie, cookieIndex) -> Bool in
+						// This is called for view models that were not added or removed so we can update their contents.
+						let usedLargeCellBefore = cookieViewModel.useLargeCell
+						// Trying to update every elements that's not new...
+						cookieViewModel.update(model: cookie)
+						// ...but recording updates only for the ones where a cell reload is needed.
+						return usedLargeCellBefore != cookieViewModel.useLargeCell
+					},
+					remove: { (cookieViewModel, index) in
+						// Nothing to do for removed cookies here, but we could mark them as such, for example,
+						// so somebody still holding a reference to them knows they are old.
+					},
+					transform: { (cookie, cookieIndex) -> CookieViewModel in
+						// And this is called for every new cookie found to make a new view model out of it.
+						return CookieViewModel(model: cookie)
+					}
+				)
+
+				// Need to remember changes for the next of our 2 stage reload process.
+				newCookieListChanges = changes
+
+				print("Changes: \(changes)")
+				assert(
+					newCookieList.map { $0.id } == model.items.map { "\($0.id)" },
+					"The view model array with changes replayed should have the same elements as the source array"
+				)
+
+				// Performing row reloads first as in general they cannot be played together with moves within the same
+				// beginUpdates()/endUpdates() block.
+				let reloaded = changes.applyReloadsBefore(
+					tableView: view.tableView,
+					indexPathForItemIndex: { IndexPath(row: $0, section: 0) },
+					reloadAnimation: .automatic
+				)
+				if reloaded {
+					lastReloaded = Date()
+				}
+				reloadStage = .rowReloadsOnly
+				// Need to handle normal updates afterwards. Calling ourselves to either reschedule or perform them asap.
+				self.updateViewModel()
+
+			case .rowReloadsOnly:
+
+				guard let changes = newCookieListChanges else {
+					preconditionFailure()
 				}
 
-				updateTimer?.invalidate()
-				updateTimer = nil
+				cookieList = newCookieList
+				let reloaded = changes.applySkippingReloads(
+					tableView: view.tableView,
+					indexPathForItemIndex: { IndexPath(row: $0, section: 0) },
+					deletionAnimation: .right,
+					insertionAnimation: .left
+				)
+				if reloaded {
+					lastReloaded = Date()
+				}
+				reloadStage = .otherUpdates
 			}
-
-			let changes = MMMArrayChanges(
-				oldArray: cookieList, oldElementId: { $0.id },
-				newArray: model.items, newElementId: { "\($0.id)" },
-				hasUpdatedContents: { (cookieViewModel, cookieViewModelIndex, cookie, cookieIndex) -> Bool in
-					// We can check what's new here or we can simply return `false` to let the `update`
-					// block in the applyToArray() call below called for every element that is still here
-					// and let it decide on what's new and wheather or not observers should be called.
-					return cookieViewModel.name != cookie.name
-				}
-			)
-
-			changes.applyToArray(
-				&cookieList,
-				newArray: model.items,
-				transform: { CookieViewModel(model: $0) },
-				update: { (cookiewViewModel, cookie) in
-					cookiewViewModel.update(model: cookie)
-				}
-			)
-
-			assert(
-				cookieList.map { $0.id } == model.items.map { "\($0.id)" },
-				"The view model array with changes replayed should have the same elements as the source array"
-			)
-
-			changes.applyToTableView(
-				view.tableView,
-				indexPathForItemIndex: { IndexPath(row: $0, section: 0) },
-				deletionAnimation: .right,
-				insertionAnimation: .left,
-				// In our case we don't need to reload cells as they directly monitor the view models
-				// and their side does not need to change.
-				reloadAnimation: nil
-			)
-
-			lastUpdated = Date()
 		}
 	}
 
@@ -144,16 +193,20 @@ class CookieListViewController: UIViewController, CookieListObserver, UITableVie
 
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-		let identifier = "cookieCell"
+		let viewModel = cookieList[indexPath.row]
+
+		let useLargeCell = viewModel.useLargeCell
+
+		let identifier = useLargeCell ? "largeCell" : "smallCell"
 		let cell: CookieCell = {
 			if let cell = tableView.dequeueReusableCell(withIdentifier: identifier) as? CookieCell {
 				return cell
 			} else {
-				return CookieCell(reuseIdentifier: identifier)
+				return CookieCell(reuseIdentifier: identifier, largeStyle: useLargeCell)
 			}
 		}()
 
-		cell.viewModel = cookieList[indexPath.row]
+		cell.viewModel = viewModel
 
 		return cell
 	}
@@ -163,8 +216,20 @@ extension CookieListViewController {
 
 	internal class CookieCell: UITableViewCell, CookieViewModelDelegate {
 
-		public init(reuseIdentifier: String?) {
+		public init(reuseIdentifier: String?, largeStyle: Bool) {
+
 			super.init(style: .default, reuseIdentifier: reuseIdentifier)
+
+			guard let textLabel = textLabel else {
+				preconditionFailure()
+			}
+
+			textLabel.numberOfLines = 0
+			if largeStyle {
+				textLabel.font = UIFont.preferredFont(forTextStyle: .largeTitle)
+			} else {
+				textLabel.font = UIFont.preferredFont(forTextStyle: .body)
+			}
 		}
 
 		required init?(coder aDecoder: NSCoder) {
@@ -182,10 +247,15 @@ extension CookieListViewController {
 		}
 
 		private func update() {
+
+			guard let textLabel = self.textLabel else {
+				preconditionFailure()
+			}
+
 			if let viewModel = viewModel {
-				self.textLabel?.text = viewModel.name
+				textLabel.text = viewModel.name
 			} else {
-				self.textLabel?.text = nil
+				textLabel.text = nil
 			}
 		}
 

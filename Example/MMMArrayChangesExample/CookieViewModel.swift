@@ -5,13 +5,15 @@
 
 import Foundation
 
-/// (NSObject because `MMMArrayChanges` is ObjC friendly and thus we need to be too.)
-class CookieViewModel: NSObject {
+class CookieViewModel: CustomStringConvertible {
 
 	// Our cookie model use Int for their IDs, having different type here just for the demo.
 	public let id: String
 	public private(set) var name: String
 	// ... other fields.
+
+	// `true` if we should use a larger cell for this cookie.
+	public private(set) var useLargeCell: Bool
 
 	// Using a delegate here instead of observers to keep the example small and independent.
 	public weak var delegate: CookieViewModelDelegate?
@@ -19,10 +21,12 @@ class CookieViewModel: NSObject {
 	init(model: CookieList.Cookie) {
 		self.id = "\(model.id)"
 		self.name = model.name
+		self.useLargeCell = model.isFavorite
 		// ...
 	}
 
-	public func update(model: CookieList.Cookie) {
+	@discardableResult
+	public func update(model: CookieList.Cookie) -> Bool {
 
 		assert(self.id == "\(model.id)")
 
@@ -33,11 +37,22 @@ class CookieViewModel: NSObject {
 			dirty = true
 		}
 
+		let useLargeCell = model.isFavorite
+		if self.useLargeCell != useLargeCell {
+			self.useLargeCell = useLargeCell
+			dirty = true
+		}
+
 		// ...
 
 		if dirty {
 			delegate?.cookieViewModelDidChange(viewModel: self)
 		}
+		return dirty
+	}
+
+	public var description: String {
+		return "\(type(of: self))(#\(id), '\(name)', large: \(useLargeCell))"
 	}
 }
 

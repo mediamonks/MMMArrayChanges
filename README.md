@@ -16,7 +16,11 @@ pod 'MMMArrayChanges'
 
 ## Quick Example
 
-(See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.)
+See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.
+
+![Example Video](./Example.mp4)
+
+---
 
 Imagine we are somewhere in a model representing a list of cookies updatable from a backend:
 
@@ -67,9 +71,9 @@ Enter `MMMArrayChanges` (ObjC-friendly and `UITableView`-compatible) or, for a s
 items.diffUpdate(
 	// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
 	elementId: { cookie -> String in cookie.id },
-	newArray: apiResponse2,
+	sourceArray: apiResponse2,
 	// We decided to use the same IDs that are used by the models, i.e. string ones.
-	newElementId: { plainCookie -> String in "\(plainCookie.id)" },
+	sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
 	transform: { (plainCookie) -> CookieModel in
 		// This is called for every plain API object that has no corresponding "thick" cookie model yet,
 		// i.e. for every new cookie. We create new "thick" models only for those.

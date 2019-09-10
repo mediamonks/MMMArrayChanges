@@ -74,8 +74,10 @@ private struct CookieFromAPI {
 class MMMArrayChangesTestCaseSwift : XCTestCase {
 
 	func testBasics() {
+		var array = [1, 2, 3]
+		let sourceArray = [3, 4, 2]
 		XCTAssertEqual(
-			MMMArrayChanges(oldArray: [1, 2, 3], newArray: [3, 4, 2]),
+			MMMArrayChanges.byUpdatingArray(&array, sourceArray: sourceArray),
 			MMMArrayChanges(
 				removals: [.init(0)],
 				insertions: [.init(1)],
@@ -138,9 +140,9 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		items.diffUpdate(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
 			elementId: { cookie -> String in cookie.id },
-			newArray: apiResponse,
+			sourceArray: apiResponse,
 			// We decided to use the same IDs that are used by the models, i.e. string ones.
-			newElementId: { plainCookie -> String in "\(plainCookie.id)" },
+			sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
 			transform: { (apiModel) -> Cookie in
 				// Called for every plain API object that has no corresponding "thick" cookie model yet,
 				// i.e. for every new cookie. We create new "thick" models only for those.

@@ -4,7 +4,7 @@
 //
 
 /**
-Represents differences between two arrays with elements possibly of different types.
+Finds the differences between two arrays with elements possibly of different types.
 
 (`MMMArrayChanges` ported from ObjC for better performance and convenience. The ObjC version was unable to directly
 work with arrays of Swift protocols among other things.)
@@ -89,7 +89,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		}
 
 		public var description: String {
-			return "\(oldIndex) -> *\(newIndex)"
+			return "\(oldIndex)/\(newIndex)"
 		}
 	}
 
@@ -138,77 +138,91 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	}
 
     /**
-	Applies the difference between two arrays recorded earlier.
+	Replays the changes represented by the receiver onto the given array (which in general is different from the array
+	that was used to record the changes).
+
+	The order of closures in the parameters reflects the order of operations:
+
+	1. Items corresponding to records in `removals` are deleted with the `remove` closure called after every removal.
+	2. Items are moved according to `moves` records.
+	3. New items are inserted with `transform` closure making items for the array from items of the `sourceArray`.
+	4. Old items are updated from the new ones by the `update` closure.
 
 	- Parameters:
 
-	  - oldArray: The array the changes were built with.
+		- array: The array we're replaying changes onto.
 
-	  - newArray: The array the changes were built with.
+		- sourceArray: The array we want our target array to correspond to after the application of the changes.
+			(Note this one might have objects of different type.)
 
-	  - transform: Creates a new element to be inserted into `oldArray` from a corresponding element of the `newArray`.
+		- remove: Called for every item removed from the array (after removal but before items are moved).
 
-	  - update: Modifies an element from the `oldArray` based on the corresponding element from the `newArray`.
+		- transform: Creates a new element to be inserted into our array from a corresponding element of the `sourceArray`.
 
-	  - remove: Optional closure that is called for every item removed from the `oldArray` (after the removal
-		but before adding new items or moving them).
+		- update: Updates the given element from a target array based on the corresponding element from the `sourceArray`.
 	*/
-    public func applyToArray<OldElement, NewElement>(
-    	_ oldArray: inout [OldElement],
-    	newArray: [NewElement],
-    	transform: (NewElement) -> OldElement,
-    	update: ((OldElement, NewElement) -> Void)? = nil,
-    	remove: ((OldElement) -> Void)? = nil
+    public func applyToArray<Element, SourceElement>(
+    	_ array: inout [Element],
+    	sourceArray: [SourceElement],
+    	remove: ((_ element: Element) -> Void),
+    	transform: (_ newElement: SourceElement) -> Element,
+    	update: ((_ element: Element, _ sourceElement: SourceElement) -> Void)
 	) {
 
 		for r in removals {
-			let item = oldArray[r.index]
-			oldArray.remove(at: r.index)
-			remove?(item)
+			let item = array[r.index]
+			array.remove(at: r.index)
+			remove(item)
 		}
 
 		for m in moves {
-			let item = oldArray[m.intermediateSourceIndex]
-			oldArray.remove(at: m.intermediateSourceIndex)
-			oldArray.insert(item, at: m.intermediateTargetIndex)
+			let item = array[m.intermediateSourceIndex]
+			array.remove(at: m.intermediateSourceIndex)
+			array.insert(item, at: m.intermediateTargetIndex)
 		}
 
 		for i in insertions {
-			let item = transform(newArray[i.index])
-			oldArray.insert(item, at: i.index)
+			let item = transform(sourceArray[i.index])
+			array.insert(item, at: i.index)
 		}
 
-		if let update = update {
-			for u in updates {
-				update(oldArray[u.newIndex], newArray[u.newIndex])
-			}
+		for u in updates {
+			update(array[u.newIndex], sourceArray[u.newIndex])
 		}
 	}
 
 	/**
-	Replays updates represented by the receiver onto a `UITableView` within its own beginUpdates()/endUpdates() block.
+	Replays the changes represented by the receiver onto a `UITableView` within a `beginUpdates()`/`endUpdates()` block.
 
-	In addition, if `reloadAnimation` is not `nil`, then cells corresponding to updated items are reloaded within their
-	own beginUpdates()/endUpdates() block. (This is optional, as normally the cells would monitor the
-	corresponding items directly and update themselves.)
+	Only the changes corresponding to `removals`, `insertions` and `moves` are replayed.
+	The ones corresponding to the `updates` should be replayed as row reloads in a separate call because:
+
+	1. They are not needed when cells observe the corresponding view models on their own and their heights don't change.
+	2. Reloads cannot belong to the same `beginUpdates()`/`endUpdates()` transaction as cells that move cannot be
+	   reloaded as well (getting "attempt to perform a delete and a move from the same index path").
+	3. Replaying the reloads in a separate `beginUpdates()`/`endUpdates()` block just after the insertions/removals
+	   won't lead to nice results anyway, one have to wait for the previous animations to complete.
+
+	- Returns:
+
+		- `true`, if at least one change has been applied.
 
 	- Parameters:
 	
-		- indexPathForItemIndex: A block that can return an index path corresponding to the index of the element
+		- indexPathForItemIndex: A closure returning an index path corresponding to the index of the element
 			either in the new or the old arrays. I.e. it can only customize the section or provide fixed shift
-			of the row index.
-
-		- reloadAnimation: If non-nil, then updates are applied as row reloads within a separate beginUpdates()/endUpdates() block.
+			of row indexes.
 	*/
-	public func applyToTableView(
-		_ tableView: UITableView,
-		indexPathForItemIndex: (Int) -> IndexPath,
+	@discardableResult
+	public func applySkippingReloads(
+		tableView: UITableView,
+		indexPathForItemIndex: (_ itemIndex: Int) -> IndexPath,
 		deletionAnimation: UITableView.RowAnimation,
-		insertionAnimation: UITableView.RowAnimation,
-		reloadAnimation: UITableView.RowAnimation?
-	) {
-		if isEmpty {
-			return
+		insertionAnimation: UITableView.RowAnimation
+	) -> Bool {
+
+		guard removals.count + insertions.count + moves.count > 0 else {
+			return false
 		}
 
 		tableView.beginUpdates()
@@ -216,91 +230,133 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		tableView.deleteRows(at: removals.map { indexPathForItemIndex($0.index) }, with: deletionAnimation)
 		tableView.insertRows(at: insertions.map { indexPathForItemIndex($0.index) }, with: insertionAnimation)
 
-		updates.forEach {
-			if $0.oldIndex != $0.newIndex {
-				tableView.moveRow(at: indexPathForItemIndex($0.oldIndex), to: indexPathForItemIndex($0.newIndex))
-			}
+		moves.forEach {
+			tableView.moveRow(at: indexPathForItemIndex($0.oldIndex), to: indexPathForItemIndex($0.newIndex))
 		}
 
 		tableView.endUpdates()
 
-		if let reloadAnimation = reloadAnimation {
-			let rowsToReload = updates.map{ indexPathForItemIndex($0.newIndex) }
-			if !rowsToReload.isEmpty {
-				tableView.beginUpdates()
-				tableView.reloadRows(at: rowsToReload, with: reloadAnimation)
-				tableView.endUpdates()
-			}
-		}
+		return true
 	}
 
 	/**
-	Finds UITableView-compatible differences between two arrays consisting of elements of different types.
+	Applies the changes corresponding to `updates` property of the receiver as row reloads on the given table view
+	within a `beginUpdates()`/`endUpdates()` block. It is assumed that other changes represented by the receiver
+	have been applied already, i.e. this function works with `newIndex` property of every record in `updates`.
 
-	The `oldElementId` and `newElementId` closures should be able to provide an ID that can be used to distiniguish
+	This is needed for better cell update animations when reloads should happen at the same time as movements/removals/insertions.
+	*/
+	@discardableResult
+	public func applyReloadsAfter(
+		tableView: UITableView,
+		indexPathForItemIndex: (_ itemIndex: Int) -> IndexPath,
+		reloadAnimation: UITableView.RowAnimation
+	) -> Bool {
+
+		guard updates.count > 0 else {
+			return false
+		}
+
+		tableView.beginUpdates()
+		tableView.reloadRows(at: updates.map { indexPathForItemIndex($0.newIndex) }, with: reloadAnimation)
+		tableView.endUpdates()
+
+		return true
+	}
+
+	/**
+	Same as `applyReloadsAfter(tableView:indexPathForItemIndex:reloadAnimation:)` but assuming that other changes represented
+	by the receiver have **not** been applied already, i.e. this function works with `oldIndex` property of every record in `updates`.
+	*/
+	@discardableResult
+	public func applyReloadsBefore(
+		tableView: UITableView,
+		indexPathForItemIndex: (_ itemIndex: Int) -> IndexPath,
+		reloadAnimation: UITableView.RowAnimation
+	) -> Bool {
+
+		guard updates.count > 0 else {
+			return false
+		}
+
+		tableView.beginUpdates()
+		tableView.reloadRows(at: updates.map { indexPathForItemIndex($0.oldIndex) }, with: reloadAnimation)
+		tableView.endUpdates()
+
+		return true
+	}
+
+	/**
+	Finds UITableView-compatible differences between two arrays consisting of elements of different types
+	updating the given array along the way while avoiding recreating elements that have corresponding elements
+	in the `sourceArray`.
+
+	The `elementId` and `sourceElementId` closures should be able to provide an ID that can be used to distiniguish
 	elements of the old and new arrays.
 
-	The `hasUpdatedContents` is called for items having the same IDs to figure out if any inner properties of the items
-	have changed enough to mark the corresponding item as "updated" (e.g. to require a reload of a corresponding
-	table view cell).
+	- Parameters:
+
+		- update: Optional closure that's called for every element in the array that was not added to update its contents.
+
+		- remove: Optional closure that's called for every removed element of the array.
+
+		- transform: A closure that should be able to creat a new element of the array from the corresponding element
+			of the source array.
 	*/
-	public convenience init<OldElement, NewElement, ElementId: Hashable>(
-		oldArray: [OldElement], oldElementId: (OldElement) -> ElementId,
-		newArray: [NewElement], newElementId: (NewElement) -> ElementId,
-		hasUpdatedContents: ((_ oldElement: OldElement, _ oldIndex: Int, _ newElement: NewElement, _ newIndex: Int) -> Bool)? = nil
-	) {
-		// TODO: it's a literal port from ObjC below, perhaps can improve this.
+	public static func byUpdatingArray<Element, SourceElement, ElementId: Hashable>(
+		_ array: inout [Element], elementId: (Element) -> ElementId,
+		sourceArray: [SourceElement], sourceElementId: (SourceElement) -> ElementId,
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool)? = nil,
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
+		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
+	) -> MMMArrayChanges {
 
 		// First let's quickly check if the arrays are the same, this should be the most common situation.
-		if oldArray.count == newArray.count {
+		if array.count == sourceArray.count {
 
+			// Yes, it's like zip().allSatisty().
 			let sameIds: Bool = {
-				// Yes, it's like zip().allSatisty().
-				for i in 0..<oldArray.count {
-					if oldElementId(oldArray[i]) != newElementId(newArray[i]) {
+				for i in 0..<array.count {
+					if elementId(array[i]) != sourceElementId(sourceArray[i]) {
 						return false
 					}
 				}
 				return true
 			}()
-
 			if sameIds {
 
 				// OK, nothing was moved, added or removed.
-				// But let's check if the contents of any of the items have changed.
+				// But let's check for item updates.
 				var updates: [Update] = []
-				if let hasUpdatedContents = hasUpdatedContents {
-					for i in 0..<oldArray.count {
-						if hasUpdatedContents(oldArray[i], i, newArray[i], i) {
-							updates.append(.init(i, i))
-						}
+				for i in 0..<array.count {
+					if update?(array[i], i, sourceArray[i], i) ?? false {
+						updates.append(.init(i, i))
 					}
-				} else {
-					// Assuming no changes in the contents when the comparison closure is not provided.
 				}
-				self.init(removals: [], insertions: [], moves: [], updates: updates)
 
-				return
+				return MMMArrayChanges(removals: [], insertions: [], moves: [], updates: updates)
 			}
 		}
 
-		// Now let's index all the items by their IDs.
+		// OK, there seem to be changes, let's index all the items by their IDs.
+
+		// TODO: Not sure about complexity of creation of these sets, O(N * log(N))?
 
 		// All IDs from the `oldArray`.
-		let oldIds = Set<ElementId>(oldArray.map(oldElementId))
-		precondition(oldIds.count == oldArray.count, "Elements in the `oldArray` cannot have duplicate IDs")
+		let oldIds = Set<ElementId>.init(array.map(elementId))
+		precondition(oldIds.count == array.count, "Elements in the `oldArray` cannot have duplicate IDs")
 
 		// All IDs from the `newArray`.
-		let newIds = Set<ElementId>(newArray.map(newElementId))
-		precondition(newIds.count == newArray.count, "Elements in the `newArray` cannot have duplicate IDs")
+		let newIds = Set<ElementId>(sourceArray.map(sourceElementId))
+		precondition(newIds.count == sourceArray.count, "Elements in the `newArray` cannot have duplicate IDs")
 
 		// Removals.
 		var removals: [Removal] = []
-		// intermediate[i] will be an index of the object in the oldArray at i-th place after all removals are performed.
-		var intermediate = [Int](0..<oldArray.count)
+		// intermediate[i] tells where the i-th element was in the `oldArray` before elements to be removed were gone.
+		var intermediate = [Int](0..<array.count)
 		// Removing in the reverse order, so no correction is needed for the indexes.
-		for i in (0..<oldArray.count).reversed() {
-			if !newIds.contains(oldElementId(oldArray[i])) {
+		for i in (0..<array.count).reversed() {
+			if !newIds.contains(elementId(array[i])) {
 				removals.append(.init(i))
 				intermediate.remove(at: i)
 			}
@@ -308,8 +364,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 
 		// Insertions.
 		var insertions: [Insertion] = []
-		for i in 0..<newArray.count {
-			if !oldIds.contains(newElementId(newArray[i])) {
+		for i in 0..<sourceArray.count {
+			if !oldIds.contains(sourceElementId(sourceArray[i])) {
 				insertions.append(.init(i))
 			}
 		}
@@ -318,37 +374,38 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		var moves: [Move] = []
 		var updates: [Update] = []
 
+		// Going through the new array and checking where each element has moved from.
 		var intermediateTargetIndex: Int = 0
-		for newIndex in 0..<newArray.count {
+		for newIndex in 0..<sourceArray.count {
 
-			let newItem = newArray[newIndex]
-			let newId = newElementId(newItem)
+			let newItem = sourceArray[newIndex]
+			let newId = sourceElementId(newItem)
 			if !oldIds.contains(newId) {
-				// Skip added items.
+				// This one was just inserted, not interested.
 				continue
 			}
 
 			let oldIndex = intermediate[intermediateTargetIndex]
-			let oldItem = oldArray[oldIndex]
-			let oldId = oldElementId(oldItem)
+			let oldItem = array[oldIndex]
+			let oldId = elementId(oldItem)
 			if oldId == newId {
 
 				// The item is at its target position already, let's only check if the contents has updated.
-				if hasUpdatedContents?(oldItem, oldIndex, newItem, newIndex) ?? false {
+				if update?(oldItem, oldIndex, newItem, newIndex) ?? false {
 					updates.append(.init(oldIndex, newIndex))
 				}
 
 			} else {
 
-				// A different element here, need a movement.
+				// A different element here, let's see where it's coming from.
 
 				// Let's find where this element is in the old array.
-				// TODO: same as in ObjC, this reverse look up needs to be improved using ID to index map
+				// TODO: same as in ObjC, this reverse look up needs to be improved performance-wise.
 				var oldNewIndex: Int = NSNotFound
 				var intermediateSourceIndex: Int = 0
 				while intermediateSourceIndex < intermediate.count {
 					oldNewIndex = intermediate[intermediateSourceIndex]
-					if oldElementId(oldArray[oldNewIndex]) == newId {
+					if elementId(array[oldNewIndex]) == newId {
 						break
 					}
 					intermediateSourceIndex += 1
@@ -364,7 +421,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 				intermediate.insert(t, at: intermediateTargetIndex)
 
 				// And finally check if the item has content changes as well.
-				if hasUpdatedContents?(oldArray[oldNewIndex], oldNewIndex, newItem, newIndex) ?? false {
+				if update?(array[oldNewIndex], oldNewIndex, newItem, newIndex) ?? false {
 					// Yes, record an update, too.
 					updates.append(.init(oldNewIndex, newIndex))
 				}
@@ -373,39 +430,82 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			intermediateTargetIndex += 1
 		}
 
-		self.init(removals: removals, insertions: insertions, moves: moves, updates: updates)
+		for r in removals {
+			let item = array[r.index]
+			array.remove(at: r.index)
+			remove?(item, r.index)
+		}
+
+		for m in moves {
+			let item = array[m.intermediateSourceIndex]
+			array.remove(at: m.intermediateSourceIndex)
+			array.insert(item, at: m.intermediateTargetIndex)
+		}
+
+		for i in insertions {
+			let item = transform(sourceArray[i.index], i.index)
+			array.insert(item, at: i.index)
+		}
+
+		return MMMArrayChanges(removals: removals, insertions: insertions, moves: moves, updates: updates)
 	}
 
-	/// Simplified initializer for the case when elements of both arrays have same types and can work as their own IDs.
-	///
-	/// TODO: Later add another one for elements supporting `Identifiable` protocol.
-	public convenience init<Element: Hashable>(oldArray: [Element], newArray: [Element]) {
-		self.init(
-			oldArray: oldArray, oldElementId: { $0 },
-			newArray: newArray, newElementId: { $0 }
+	/// A shortcut for the case when both arrays contain objects of reference types and their references can be used as identifiers.
+	public static func byUpdatingArray<Element: AnyObject, SourceElement: AnyObject>(
+		_ array: inout [Element],
+		sourceArray: [SourceElement],
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool)? = nil,
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
+		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
+	) -> MMMArrayChanges {
+		var tempArray = array
+		let result = byUpdatingArray(
+			&tempArray,
+			elementId: { (element) -> ObjectIdentifier in
+				return ObjectIdentifier(element)
+			},
+			sourceArray: sourceArray,
+			sourceElementId: { (sourceElement) -> ObjectIdentifier in
+				return ObjectIdentifier(sourceElement)
+			},
+			update: update,
+			remove: remove,
+			transform: transform
 		)
+		array = tempArray
+		return result
 	}
 
-	/// Simplified initializer for the cases when elements of both arrays have same reference types and are considered
-	/// same as long as their references are the same (i.e. `ObjectIdentifier` works well as their ID).
-	///
-	/// - Note: This wrapper does not compile well under Swift 4.2 when `Element` is a protocol.
-	/// TODO: check if this is still an issue in Swift 5
-	///
-	/// - Parameter hasUpdated: Return `true`, if an update should be registered for the given object.
-	///    This is like `hasUpdatedContents` in the longer version of this initializer.
-	public convenience init<Element: AnyObject>(
-		oldArray: [Element],
-		newArray: [Element],
-		hasUpdatedContents: ((_ element: Element, _ oldIndex: Int, _ newIndex: Int) -> Bool)? = nil
-	) {
-		self.init(
-			oldArray: oldArray, oldElementId: { ObjectIdentifier($0) },
-			newArray: newArray, newElementId: { ObjectIdentifier($0) },
-			hasUpdatedContents: { (oldItem, oldIndex, newItem, newIndex) in
-				assert(oldItem === newItem)
-				return hasUpdatedContents?(oldItem, oldIndex, newIndex) ?? false
+	/// A shortcut for the case when both arrays are of the same hashable types and their elements themselves can be used
+	/// as their own identifiers.
+	public static func byUpdatingArray<Element: Hashable>(
+		_ array: inout [Element],
+		sourceArray: [Element],
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool)? = nil,
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
+		transform: ((_ newElement: Element, _ newIndex: Int) -> Element)? = nil
+	) -> MMMArrayChanges  {
+		var tempArray = array
+		let result = byUpdatingArray(
+			&tempArray,
+			elementId: { (_ element: Element) -> Element in
+				return element
+			},
+			sourceArray: sourceArray,
+			sourceElementId: { (_ sourceElement: Element) -> Element in
+				return sourceElement
+			},
+			update: update,
+			remove: remove,
+			transform: { (newElement, newIndex) -> Element in
+				if let transform = transform {
+					return transform(newElement, newIndex)
+				} else {
+					return newElement
+				}
 			}
 		)
+		array = tempArray
+		return result
 	}
 }

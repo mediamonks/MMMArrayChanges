@@ -9,14 +9,19 @@ import Foundation
 /// external changes on the model.
 class CookieList {
 
-	public class Cookie: NSObject {
+	public class Cookie: CustomStringConvertible {
 
 		public let id: Int
 		public internal(set) var name: String
+		public internal(set) var isFavorite: Bool = false
 
 		internal init(id: Int, name: String) {
 			self.id = id
 			self.name = name
+		}
+
+		public var description: String {
+			return "\(type(of: self))(#\(id), '\(name)', favorite: \(isFavorite))"
 		}
 	}
 
@@ -117,10 +122,14 @@ class CookieList {
 		for _ in 0...numberOfUpdates {
 			if items.count > 0 {
 				let cookie = items[randomItemPosition()]
+				// For now let's sync updates in the names with updates in the favorite status.
+				// This way we can see that a change in the favorite status is properly reflected in the style of the cell.
 				if cookie.name.hasSuffix("!") {
 					cookie.name.removeLast()
+					cookie.isFavorite = false
 				} else {
 					cookie.name.append("!")
+					cookie.isFavorite = true
 				}
 			}
 		}

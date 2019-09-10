@@ -47,20 +47,21 @@ extension Array where Element: AnyObject {
 	  - remove: Called for every element of the receiver that does not have a corresponding element in the `sourceArray`.
 
 	- Complexity:
-	Must be *O(n^2)* because removing elements from a dictionary is quoted at *O(n)*.
+
+		Must be *O(n^2)* because removing elements from a dictionary is quoted at *O(n)*.
 	*/
 	public mutating func diffUpdate<SourceElement, ElementId: Hashable>(
-		elementId: (Element) -> ElementId,
-		newArray: [SourceElement], newElementId: (SourceElement) -> ElementId,
-		transform: (SourceElement) -> Element,
-		update: ((Element, SourceElement) -> Void)? = nil,
-		remove: ((Element) -> Void)? = nil
+		elementId: (_ element: Element) -> ElementId,
+		sourceArray: [SourceElement], sourceElementId: (_ sourceElement: SourceElement) -> ElementId,
+		transform: (_ sourceElement: SourceElement) -> Element,
+		update: ((_ element: Element, _ sourceElement: SourceElement) -> Void)? = nil,
+		remove: ((_ element: Element) -> Void)? = nil
 	) {
 
 		var index = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
 
-		let result = newArray.map { (sourceElement) -> Element in
-			let id = newElementId(sourceElement)
+		let result = sourceArray.map { (sourceElement) -> Element in
+			let id = sourceElementId(sourceElement)
 			if let element = index[id] {
 				index.removeValue(forKey: id)
 				update?(element, sourceElement)
