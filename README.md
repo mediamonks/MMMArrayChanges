@@ -18,7 +18,7 @@ pod 'MMMArrayChanges'
 
 See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.
 
-![Example Video](./Example.mp4)
+![Example GIF](./Example.gif)
 
 ---
 
