@@ -451,8 +451,12 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		return MMMArrayChanges(removals: removals, insertions: insertions, moves: moves, updates: updates)
 	}
 
-	/// A shortcut for the case when both arrays contain objects of reference types and their references can be used as identifiers.
-	public static func byUpdatingArray<Element: AnyObject>(
+	/// A shortcut for the case when both arrays contain objects of reference types and their references can be used as
+	/// identifiers.
+	////
+	/// - Note: I could name it `byUpdatingArray` as well, but that confuses Swift 4.2, it cannot find a proper method
+	/// even though at least `elementId:` label is not present in this one.
+	public static func byUpdatingArrayOfObjects<Element: AnyObject>(
 		_ array: inout [Element],
 		sourceArray: [Element],
 		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool)? = nil,
