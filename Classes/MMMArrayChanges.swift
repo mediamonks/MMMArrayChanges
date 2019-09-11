@@ -299,6 +299,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		- update: Optional closure that's called for every element in the array that was not added to update its contents.
 
 		- remove: Optional closure that's called for every removed element of the array.
+			Note that it should not try removing the corresponing element, it's only for your own book-keeping.
 
 		- transform: A closure that should be able to creat a new element of the array from the corresponding element
 			of the source array.
@@ -306,8 +307,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	public static func byUpdatingArray<Element, SourceElement, ElementId: Hashable>(
 		_ array: inout [Element], elementId: (Element) -> ElementId,
 		sourceArray: [SourceElement], sourceElementId: (SourceElement) -> ElementId,
-		update: (_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool,
-		remove: (_ element: Element, _ oldIndex: Int) -> Void,
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool)? = nil,
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
 		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
 	) -> MMMArrayChanges {
 
@@ -329,7 +330,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 				// But let's check for item updates.
 				var updates: [Update] = []
 				for i in 0..<array.count {
-					if update(array[i], i, sourceArray[i], i) {
+					if update?(array[i], i, sourceArray[i], i) ?? false {
 						updates.append(.init(i, i))
 					}
 				}
@@ -391,7 +392,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			if oldId == newId {
 
 				// The item is at its target position already, let's only check if the contents has updated.
-				if update(oldItem, oldIndex, newItem, newIndex) {
+				if update?(oldItem, oldIndex, newItem, newIndex) ?? false {
 					updates.append(.init(oldIndex, newIndex))
 				}
 
@@ -421,7 +422,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 				intermediate.insert(t, at: intermediateTargetIndex)
 
 				// And finally check if the item has content changes as well.
-				if update(array[oldNewIndex], oldNewIndex, newItem, newIndex) {
+				if update?(array[oldNewIndex], oldNewIndex, newItem, newIndex) ?? false {
 					// Yes, record an update, too.
 					updates.append(.init(oldNewIndex, newIndex))
 				}
@@ -433,7 +434,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		for r in removals {
 			let item = array[r.index]
 			array.remove(at: r.index)
-			remove(item, r.index)
+			remove?(item, r.index)
 		}
 
 		for m in moves {
@@ -451,55 +452,51 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	}
 
 	/// A shortcut for the case when both arrays contain objects of reference types and their references can be used as identifiers.
-	public static func byUpdatingArray<Element: AnyObject, SourceElement: AnyObject>(
+	public static func byUpdatingArray<Element: AnyObject>(
 		_ array: inout [Element],
-		sourceArray: [SourceElement],
-		update: (_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool,
-		remove: (_ element: Element, _ oldIndex: Int) -> Void,
-		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
+		sourceArray: [Element],
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool)? = nil,
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil
 	) -> MMMArrayChanges {
 		let result = byUpdatingArray(
 			&array,
-			elementId: { (element) -> ObjectIdentifier in
+			elementId: { (element: Element) -> ObjectIdentifier in
 				return ObjectIdentifier(element)
 			},
 			sourceArray: sourceArray,
-			sourceElementId: { (sourceElement) -> ObjectIdentifier in
+			sourceElementId: { (sourceElement: Element) -> ObjectIdentifier in
 				return ObjectIdentifier(sourceElement)
 			},
 			update: update,
 			remove: remove,
-			transform: transform
+			transform: { (sourceElement: Element, newIndex: Int) -> Element in
+				return sourceElement
+			}
 		)
 		return result
 	}
 
-	/// A shortcut for the case when both arrays are of the same hashable types and their elements themselves can be used
-	/// as their own identifiers.
-	public static func byUpdatingArray<Element: Hashable>(
-		_ array: inout [Element],
-		sourceArray: [Element],
-		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool)? = nil,
-		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
-		transform: ((_ newElement: Element, _ newIndex: Int) -> Element)? = nil
-	) -> MMMArrayChanges  {
+	/// Changes between two simple arrays consisting of the same hashable value types, so elements themselves can
+	/// be used as their own identifiers.
+	/// (This is mainly used for testing the receiver using arrays of Int.)
+	public static func betweenSimpleArrays<Element: Hashable>(oldArray: [Element], newArray: [Element]) -> MMMArrayChanges  {
+		var tempArray = oldArray
 		let result = byUpdatingArray(
-			&array,
+			&tempArray,
 			elementId: { (_ element: Element) -> Element in
 				return element
 			},
-			sourceArray: sourceArray,
+			sourceArray: newArray,
 			sourceElementId: { (_ sourceElement: Element) -> Element in
 				return sourceElement
 			},
 			update: { (element, oldIndex, sourceElement, newIndex) -> Bool in
-				return update?(element, oldIndex, sourceElement, newIndex) ?? false
+				return false
 			},
 			remove: { (element, oldIndex) -> Void in
-				remove?(element, oldIndex)
 			},
 			transform: { (newElement, newIndex) -> Element in
-				return transform?(newElement, newIndex) ?? newElement
+				return newElement
 			}
 		)
 		return result

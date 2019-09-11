@@ -74,10 +74,8 @@ private struct CookieFromAPI {
 class MMMArrayChangesTestCaseSwift : XCTestCase {
 
 	func testBasics() {
-		var array = [1, 2, 3]
-		let sourceArray = [3, 4, 2]
 		XCTAssertEqual(
-			MMMArrayChanges.byUpdatingArray(&array, sourceArray: sourceArray),
+			MMMArrayChanges.betweenSimpleArrays(oldArray: [1, 2, 3], newArray: [3, 4, 2]),
 			MMMArrayChanges(
 				removals: [.init(0)],
 				insertions: [.init(1)],
