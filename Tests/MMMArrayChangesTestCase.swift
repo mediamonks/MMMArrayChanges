@@ -164,7 +164,9 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 			},
 			update: { (cookie, apiCookie) -> Bool in
 				// Called for every cookie model that still has a corresponding plain object in the API response.
-				// Let's update the fields we are interested in and notify observers only when needed.
+				// Let's update the fields we are interested in and notify observers of every individual object.
+				// Note that we could also return `false` here regardless of the change status of individual
+				// elements, so the diffUpdate() call would only return true in case elements were added or removed.
 				return cookie.update(apiModel: apiCookie)
 			},
 			remove: { (cookie: Cookie) in
