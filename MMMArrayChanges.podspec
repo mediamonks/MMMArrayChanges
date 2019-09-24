@@ -6,8 +6,8 @@
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "0.3.3"
-	s.summary = "Helps with finding (UITableView-compatible) differences between two lists of items, possibly of different types"
+	s.version = "0.4.0"
+	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
 	s.license = "MIT"
