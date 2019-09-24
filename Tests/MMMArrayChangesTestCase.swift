@@ -25,11 +25,13 @@ private class Cookie {
 
 	// When we get a list of fresh cookies from the backend there should be a way to update our "thick" models without
 	// recreating them and/or requiring their own observers to resubscribe.
-	internal func update(apiModel: CookieFromAPI) {
+	internal func update(apiModel: CookieFromAPI) -> Bool {
 		assert(self.id == "\(apiModel.id)", "It has to be a matching object from the API domain")
 		self.name = apiModel.name
 		// ... other fields.
 		// ... notify observers only if any fields have changed.
+		// Should return `true` here only if the fields have really changed.
+		return true;
 	}
 
 	// ... there can be more than one way of updating this model of course.
@@ -137,7 +139,9 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 
 		items.diffUpdate(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
-			elementId: { cookie -> String in cookie.id },
+			elementId: { (cookie: Cookie) -> String in
+				return cookie.id
+			},
 			sourceArray: apiResponse,
 			// We decided to use the same IDs that are used by the models, i.e. string ones.
 			sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
@@ -146,12 +150,12 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 				// i.e. for every new cookie. We create new "thick" models only for those.
 				return Cookie(apiModel: apiModel)
 			},
-			update: { (cookie, apiCookie) in
+			update: { (cookie, apiCookie) -> Bool in
 				// Called for every cookie model that still has a corresponding plain object in the API response.
 				// Let's update the fields we are interested in and notify observers only when needed.
-				cookie.update(apiModel: apiCookie)
+				return cookie.update(apiModel: apiCookie)
 			},
-			remove: { (cookie) in
+			remove: { (cookie: Cookie) in
 				// Called for all cookies that don't have matching plain objects in the backend response.
 				// Let's just mark them as removed just in case somebody holds a reference to them a bit longer than
 				// needed and might appreciate knowing that the object they hold is not in the main list anymore.

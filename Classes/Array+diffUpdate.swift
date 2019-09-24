@@ -18,8 +18,8 @@ extension Array where Element: AnyObject {
 	in the `array` ("new" or "added"), or, in other words, with transformation skipped for the elements already
 	having their transformed versions in the `array`.
 
-	(This is a Swift-only simplified version of `MMMArrayChanges` that finds the differences and applies them
-	directly to the given array. Use this unless you need to record the changes and/or apply them to `UITableView`.)
+	(This is a simplified version of `MMMArrayChanges` that finds the differences and applies them directly
+	to the given array. Use this unless you need to record the changes and/or apply them to `UITableView`.)
 
 	---
 
@@ -31,32 +31,43 @@ extension Array where Element: AnyObject {
 
 	- Parameters:
 
-	  - elementId: Provides an identifier for any element of the receiver. The identifier has to be compatible
-		with the one returned by `sourceElementId`.
+		- elementId: Should provide an identifier for any element of the receiver.
+		The identifier has to be compatible with the one returned by `sourceElementId` closure.
 
-	  - sourceArray: -
+		- sourceArray: As it says on the tin.
 
-	  - sourceElementId: Should be able to provide an identifier for every element of the `sourceArray`.
+		- sourceElementId: Should provide an identifier for every element of the `sourceArray`.
 		The identifier has to be compatible with the one returned by `elementId`.
 
-	  - transform: Called to transforms every element of the `sourceArray` that has no corresponding element in the receiver yet.
+		- transform: Called to transforms every element of the `sourceArray` that has no corresponding element in
+		the receiver yet.
 
-	  - update: Called for every element in the receiver that has a corresponding element in the `sourceArray`
+		- update: Called for every element in the receiver that has a corresponding element in the `sourceArray`
 		to update the properties of this element.
 
-	  - remove: Called for every element of the receiver that does not have a corresponding element in the `sourceArray`.
+		Can optionally return `true` to indicate the the corresponding element has been actually changed.
+		This will contribute to the result returned by the method.
+
+		- remove: Called for every element of the receiver that does not have a corresponding element in the `sourceArray`.
+
+	- Returns:
+		`true`, if the array has changed, i.e. if elements were added or removed or `update` closure
+		returned `true` for at least one element.
 
 	- Complexity:
 
 		Must be *O(n^2)* because removing elements from a dictionary is quoted at *O(n)*.
 	*/
+	@discardableResult
 	public mutating func diffUpdate<SourceElement, ElementId: Hashable>(
 		elementId: (_ element: Element) -> ElementId,
 		sourceArray: [SourceElement], sourceElementId: (_ sourceElement: SourceElement) -> ElementId,
 		transform: (_ sourceElement: SourceElement) -> Element,
-		update: ((_ element: Element, _ sourceElement: SourceElement) -> Void)? = nil,
+		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool)? = nil,
 		remove: ((_ element: Element) -> Void)? = nil
-	) {
+	) -> Bool {
+
+		var changed = false
 
 		var index = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
 
@@ -64,19 +75,33 @@ extension Array where Element: AnyObject {
 			let id = sourceElementId(sourceElement)
 			if let element = index[id] {
 				index.removeValue(forKey: id)
-				update?(element, sourceElement)
+				if update?(element, sourceElement) ?? false {
+					changed = true
+				}
 				return element
 			} else {
+				changed = true
 				return transform(sourceElement)
 			}
 		}
 
-		self = result
+		// Leftovers in the index mean removed elements and thus that the array had changes.
+		if !index.isEmpty {
+			changed = true
+		}
 
-		if let remove = remove {
-			index.forEach { (_, element) in
-				remove(element)
+		if changed {
+
+			self = result
+
+			// IDs left in the index correspond to elements missing in the new array, so they have to me marked as gone.
+			if let remove = remove {
+				index.forEach { (_, element) in
+					remove(element)
+				}
 			}
 		}
+
+		return changed
 	}
 }
