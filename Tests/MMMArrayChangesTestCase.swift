@@ -26,12 +26,21 @@ private class Cookie {
 	// When we get a list of fresh cookies from the backend there should be a way to update our "thick" models without
 	// recreating them and/or requiring their own observers to resubscribe.
 	internal func update(apiModel: CookieFromAPI) -> Bool {
+
 		assert(self.id == "\(apiModel.id)", "It has to be a matching object from the API domain")
-		self.name = apiModel.name
+
+		var changed = false
+
+		if self.name != apiModel.name {
+			self.name = apiModel.name
+			changed = true
+		}
+
 		// ... other fields.
-		// ... notify observers only if any fields have changed.
-		// Should return `true` here only if the fields have really changed.
-		return true;
+
+		// ... notify observers only if changed.
+
+		return changed
 	}
 
 	// ... there can be more than one way of updating this model of course.
@@ -118,7 +127,10 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 
 		// Using our simple map() would recreate the whole list however, so let's try diffMap()
 		// (which is wrapped into a function here to reuse it later in this test).
-		self.diffUpdate(items: &items, apiResponse: apiResponse2)
+		XCTAssertTrue(self.diffUpdate(items: &items, apiResponse: apiResponse2))
+
+		// Note that updating with the same data should not have any effect.
+		XCTAssertFalse(self.diffUpdate(items: &items, apiResponse: apiResponse2))
 
 		XCTAssert(items[0] === almondCookie && items[1] === animalCracker, "The object references are supposed to stay the same")
 		XCTAssert(items[0].name == "Almond cookie", "While properties might update")
@@ -128,16 +140,16 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 			CookieFromAPI(id: 2, name: "Animal cracker"),
 			CookieFromAPI(id: 3, name: "Oreo")
 		]
-		self.diffUpdate(items: &items, apiResponse: apiResponse3)
+		XCTAssertTrue(self.diffUpdate(items: &items, apiResponse: apiResponse3))
 
 		XCTAssert(items.count == 2 && almondCookie.isRemoved, "Almond cookie is gone")
 		XCTAssert(items[0] === animalCracker, "Animal cracker is exactly the same object")
 		XCTAssert(items[1].name == "Oreo", "And there is a new cookie")
 	}
 
-	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) {
+	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) -> Bool {
 
-		items.diffUpdate(
+		return items.diffUpdate(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
 			elementId: { (cookie: Cookie) -> String in
 				return cookie.id
