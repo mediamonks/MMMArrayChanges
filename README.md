@@ -14,13 +14,11 @@ source 'git@github.com:mediamonks/MMMTemple.git'
 pod 'MMMArrayChanges'
 ```
 
-## Quick Example
+## Example
 
-See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.
+(See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.)
 
 ![Example GIF](./Example.gif)
-
----
 
 Imagine we are somewhere in a model representing a list of cookies updatable from a backend:
 
@@ -70,19 +68,21 @@ Enter `MMMArrayChanges` (ObjC-friendly and `UITableView`-compatible) or, for a s
 ```swift
 items.diffUpdate(
 	// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
-	elementId: { cookie -> String in cookie.id },
-	sourceArray: apiResponse2,
+	elementId: { (cookie) -> String in
+		return cookie.id
+	},
+	sourceArray: apiResponse,
 	// We decided to use the same IDs that are used by the models, i.e. string ones.
 	sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
-	transform: { (plainCookie) -> CookieModel in
-		// This is called for every plain API object that has no corresponding "thick" cookie model yet,
+	transform: { (apiModel) -> Cookie in
+		// Called for every plain API object that has no corresponding "thick" cookie model yet,
 		// i.e. for every new cookie. We create new "thick" models only for those.
-		return CookieModel(plainCookie)
+		return Cookie(apiModel: apiModel)
 	},
-	update: { (cookie, plainCookie) in
+	update: { (cookie, apiCookie) -> Bool in
 		// Called for every cookie model that still has a corresponding plain object in the API response.
 		// Let's update the fields we are interested in and notify observers only when needed.
-		cookie.update(plainCookie)
+		return cookie.update(apiModel: apiCookie)
 	},
 	remove: { (cookie) in
 		// Called for all cookies that don't have matching plain objects in the backend response.
@@ -92,3 +92,5 @@ items.diffUpdate(
 	}
 )
 ```
+
+---
