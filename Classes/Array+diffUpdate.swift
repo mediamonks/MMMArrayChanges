@@ -69,25 +69,43 @@ extension Array where Element: AnyObject {
 
 		var changed = false
 
-		var index = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
+		// First building an index of the existing elements, i.e. ID -> Element.
+		var elementById = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
 
 		let result = sourceArray.map { (sourceElement) -> Element in
 			let id = sourceElementId(sourceElement)
-			if let element = index[id] {
-				index.removeValue(forKey: id)
+			if let element = elementById[id] {
+				// According to our index the current array already has a matching element, so just keep it...
+				elementById.removeValue(forKey: id)
+				// ...possibly updating.
 				if update?(element, sourceElement) ?? false {
+					// The update closure indicated that a change in the existing element should be counted
+					// alongside with removals, additions and moves.
 					changed = true
 				}
 				return element
 			} else {
+				// There is no matching element in the current array, let's create it at this position.
 				changed = true
 				return transform(sourceElement)
 			}
 		}
 
 		// Leftovers in the index mean removed elements and thus that the array had changes.
-		if !index.isEmpty {
+		if !elementById.isEmpty {
 			changed = true
+		}
+
+		if !changed {
+			// Seems like no additions or removals, but it's possible that the order of elements has changed.
+			assert(self.count == result.count)
+			for i in 0..<self.count {
+				if elementId(self[i]) != elementId(result[i]) {
+					// Right, something is off, report the change and most importantly update the current array.
+					changed = true
+					break
+				}
+			}
 		}
 
 		if changed {
@@ -96,7 +114,7 @@ extension Array where Element: AnyObject {
 
 			// IDs left in the index correspond to elements missing in the new array, so they have to me marked as gone.
 			if let remove = remove {
-				index.forEach { (_, element) in
+				elementById.forEach { (_, element) in
 					remove(element)
 				}
 			}

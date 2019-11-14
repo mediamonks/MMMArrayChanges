@@ -145,6 +145,16 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		XCTAssert(items.count == 2 && almondCookie.isRemoved, "Almond cookie is gone")
 		XCTAssert(items[0] === animalCracker, "Animal cracker is exactly the same object")
 		XCTAssert(items[1].name == "Oreo", "And there is a new cookie")
+
+		// Let's make sure that the change in order is captured (premature optimization bug in 0.4.0).
+		let apiResponse4: [CookieFromAPI] = [
+			CookieFromAPI(id: 3, name: "Oreo"),
+			CookieFromAPI(id: 2, name: "Animal cracker")
+		]
+		XCTAssertTrue(self.diffUpdate(items: &items, apiResponse: apiResponse4))
+		XCTAssert(items.count == 2)
+		XCTAssert(items[0].name == "Oreo")
+		XCTAssert(items[1] === animalCracker)
 	}
 
 	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) -> Bool {
