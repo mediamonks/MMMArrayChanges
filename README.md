@@ -9,7 +9,8 @@ iOS library that helps finding (UITableView-compatible) differences between two 
 Podfile:
 
 ```
-source 'git@github.com:mediamonks/MMMTemple.git'	
+source 'https://github.com/mediamonks/MMMSpecs.git'
+source 'https://github.com/CocoaPods/Specs.git'	
 # ...
 pod 'MMMArrayChanges'
 ```
