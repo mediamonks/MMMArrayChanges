@@ -6,7 +6,7 @@
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "0.4.1"
+	s.version = "0.4.2"
 	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
@@ -14,10 +14,11 @@ Pod::Spec.new do |s|
 	s.authors = "MediaMonks"
 	s.source = { :git => "https://github.com/mediamonks/MMMArrayChanges.git", :tag => s.version.to_s }
 	
-	s.platform = :ios, '11.0'
+	s.ios.deployment_target = '11.0'
+	s.watchos.deployment_target = '2.0'
 
 	s.subspec 'ObjC' do |ss|		
-		ss.ios.source_files = [ 'Classes/*.{h,m}' ]
+		ss.source_files = [ 'Classes/*.{h,m}' ]
 	end
 	
 	s.swift_versions = '4.2'

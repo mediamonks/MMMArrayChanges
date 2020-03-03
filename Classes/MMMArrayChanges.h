@@ -90,6 +90,8 @@ NS_SWIFT_UNAVAILABLE("Use the Swift port with the same name instead")
 	updateBlock:(void (NS_NOESCAPE ^ __nullable)(OldItemType oldItem, NewItemType newItem))updateBlock
 		NS_REFINED_FOR_SWIFT;
 
+#if TARGET_OS_IOS
+
 /**
  * Replays updates corresponding to the changes represented by the receiver onto `UITableView`.
  *
@@ -110,6 +112,8 @@ NS_SWIFT_UNAVAILABLE("Use the Swift port with the same name instead")
 	indexPathForItemIndex:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndex
 	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
 	insertionAnimation:(UITableViewRowAnimation)insertionAnimation;
+
+#endif
 
 #pragma mark -
 

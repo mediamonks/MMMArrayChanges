@@ -307,6 +307,8 @@ typedef id OldItemType;
 	}
 }
 
+#if TARGET_OS_IOS
+
 - (NSArray<NSIndexPath *> *)applyToTableView:(UITableView *)tableView
 	indexPathForItemIndex:(NSIndexPath* (NS_NOESCAPE ^)(NSInteger row))indexPathForItemIndex
 	deletionAnimation:(UITableViewRowAnimation)deletionAnimation
@@ -347,6 +349,8 @@ typedef id OldItemType;
 
 	return reloadsIndexPaths;
 }
+
+#endif
 
 @end
 
