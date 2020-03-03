@@ -190,6 +190,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			update(array[u.newIndex], sourceArray[u.newIndex])
 		}
 	}
+    
+    #if os(iOS)
 
 	/**
 	Replays the changes represented by the receiver onto a `UITableView` within a `beginUpdates()`/`endUpdates()` block.
@@ -285,6 +287,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 
 		return true
 	}
+    
+    #endif
 
 	/**
 	Finds UITableView-compatible differences between two arrays consisting of elements of different types
