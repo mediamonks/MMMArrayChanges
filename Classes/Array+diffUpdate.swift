@@ -3,7 +3,7 @@
 // Copyright (C) 2019 MediaMonks. All rights reserved.
 //
 
-extension Array where Element: AnyObject {
+extension Array {
 
 	/**
 
