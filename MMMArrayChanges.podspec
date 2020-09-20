@@ -1,12 +1,12 @@
 #
-# MMMArrayChanges.
+# MMMArrayChanges. Part of MMMTemple.
 # Copyright (C) 2019 MediaMonks. All rights reserved.
 #
 
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "0.4.4"
+	s.version = "1.0.1"
 	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
@@ -34,5 +34,5 @@ Pod::Spec.new do |s|
 		test_spec.source_files = 'Tests/*.swift'
 	end
 
-	s.default_subspec = 'Swift'
+	s.default_subspec = 'ObjC', 'Swift'	
 end
