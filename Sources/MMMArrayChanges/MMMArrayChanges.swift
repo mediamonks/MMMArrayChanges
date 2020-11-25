@@ -3,6 +3,14 @@
 // Copyright (C) 2019 MediaMonks. All rights reserved.
 //
 
+import Foundation
+
+#if canImport(UIKit)
+
+import UIKit
+
+#endif
+
 /**
 Finds the differences between two arrays with elements possibly of different types.
 
@@ -191,7 +199,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		}
 	}
     
-    #if os(iOS)
+    #if canImport(UIKit)
 
 	/**
 	Replays the changes represented by the receiver onto a `UITableView` within a `beginUpdates()`/`endUpdates()` block.

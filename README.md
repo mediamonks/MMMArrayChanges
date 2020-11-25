@@ -1,5 +1,8 @@
 # MMMArrayChanges
 
+[![Build](https://github.com/mediamonks/MMMArrayChanges/workflows/Build/badge.svg)](https://github.com/mediamonks/MMMArrayChanges/actions?query=workflow%3ABuild)
+[![Test](https://github.com/mediamonks/MMMArrayChanges/workflows/Test/badge.svg)](https://github.com/mediamonks/MMMArrayChanges/actions?query=workflow%3ATest)
+
 iOS library that helps finding (UITableView-compatible) differences between two arrays possibly having elements of different types.
 
 (This is a part of `MMMTemple` suite of iOS libraries we use at [MediaMonks](https://www.mediamonks.com/).)
@@ -10,7 +13,7 @@ Podfile:
 
 ```
 source 'https://github.com/mediamonks/MMMSpecs.git'
-source 'https://github.com/CocoaPods/Specs.git'	
+source 'https://github.com/CocoaPods/Specs.git'
 # ...
 pod 'MMMArrayChanges'
 ```

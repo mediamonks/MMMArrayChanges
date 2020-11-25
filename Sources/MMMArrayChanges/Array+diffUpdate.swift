@@ -3,6 +3,8 @@
 // Copyright (C) 2019 MediaMonks. All rights reserved.
 //
 
+import Foundation
+
 extension Array {
 
 	/**

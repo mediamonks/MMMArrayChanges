@@ -3,3 +3,9 @@ Pods/
 xcuserdata/
 # Don't want to update the .lock file every time.
 Example/Podfile.lock
+
+# SPM 
+
+/.build
+/Packages
+/.swiftpm

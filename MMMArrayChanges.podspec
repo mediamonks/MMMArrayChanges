@@ -6,7 +6,7 @@
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "1.0.2"
+	s.version = "1.0.4"
 	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 	s.watchos.deployment_target = '2.0'
 
 	s.subspec 'ObjC' do |ss|
-		ss.source_files = [ 'Classes/*.{h,m}' ]
+		ss.source_files = [ "Sources/#{s.name}ObjC/*.{h,m}" ]
 	end
 
 	s.swift_versions = '4.2'
@@ -27,12 +27,13 @@ Pod::Spec.new do |s|
 		"DEFINES_MODULE" => "YES"
 	}
 	s.subspec 'Swift' do |ss|
-		ss.source_files = [ 'Classes/*.swift' ]
+		ss.source_files = [ 'Sources/#{s.name}/*.swift' ]
 	end
 
 	s.test_spec 'TestsSwift' do |test_spec|
 		test_spec.source_files = 'Tests/*.swift'
 	end
 
-	s.default_subspec = 'ObjC', 'Swift'	
+	s.default_subspec = 'ObjC', 'Swift'
+
 end
