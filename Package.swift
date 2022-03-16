@@ -4,7 +4,10 @@ import PackageDescription
 let package = Package(
     name: "MMMArrayChanges",
     platforms: [
-        .iOS(.v11)
+        .iOS(.v11),
+        .watchOS(.v2),
+        .tvOS(.v9),
+        .macOS(.v10_10)
     ],
     products: [
         .library(

@@ -5,7 +5,7 @@
 
 import Foundation
 
-#if canImport(UIKit)
+#if os(iOS) || os(tvOS)
 
 import UIKit
 
@@ -199,7 +199,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		}
 	}
     
-    #if canImport(UIKit)
+    #if os(iOS) || os(tvOS)
 
 	/**
 	Replays the changes represented by the receiver onto a `UITableView` within a `beginUpdates()`/`endUpdates()` block.
