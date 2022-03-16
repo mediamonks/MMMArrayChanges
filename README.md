@@ -18,6 +18,12 @@ source 'https://github.com/CocoaPods/Specs.git'
 pod 'MMMArrayChanges'
 ```
 
+SPM:
+
+```swift
+.package(url: "https://github.com/mediamonks/MMMArrayChanges", .upToNextMajor(from: "1.1.0"))
+```
+
 ## Example
 
 (See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.)
