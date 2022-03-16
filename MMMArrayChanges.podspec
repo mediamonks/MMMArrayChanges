@@ -6,7 +6,7 @@
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "1.1.0"
+	s.version = "1.1.1"
 	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
 		"DEFINES_MODULE" => "YES"
 	}
 	s.subspec 'Swift' do |ss|
-		ss.source_files = [ 'Sources/#{s.name}/*.swift' ]
+		ss.source_files = [ "Sources/#{s.name}/*.swift" ]
 	end
 
 	s.test_spec 'TestsSwift' do |test_spec|
