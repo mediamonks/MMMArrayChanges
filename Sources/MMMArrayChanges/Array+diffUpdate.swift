@@ -68,13 +68,36 @@ extension Array {
 		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool)? = nil,
 		remove: ((_ element: Element) -> Void)? = nil
 	) -> Bool {
+		// We just use the compact logic here, since that will behave the same with a
+		// non-optional transform closure.
+		return compactDiffUpdate(
+			elementId: elementId,
+			sourceArray: sourceArray,
+			sourceElementId: sourceElementId,
+			transform: transform,
+			update: update,
+			remove: remove
+		)
+	}
+	
+	@discardableResult
+	/// The same as ``diffUpdate(elementId:sourceArray:transform:update:remove)`` except that it
+	/// behaves as a `Array.compactMap` instead of `Array.map`, for cases where your source array can contain
+	/// incomplete objects that might be populated in a future call.
+	public mutating func compactDiffUpdate<SourceElement, ElementId: Hashable>(
+		elementId: (_ element: Element) -> ElementId,
+		sourceArray: [SourceElement], sourceElementId: (_ sourceElement: SourceElement) -> ElementId,
+		transform: (_ sourceElement: SourceElement) -> Element?,
+		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool)? = nil,
+		remove: ((_ element: Element) -> Void)? = nil
+	) -> Bool {
 
 		var changed = false
 
 		// First building an index of the existing elements, i.e. ID -> Element.
-		var elementById = Dictionary<ElementId, Element>(uniqueKeysWithValues: self.map { (elementId($0), $0) })
+		var elementById = [ElementId: Element](uniqueKeysWithValues: self.map { (elementId($0), $0) })
 
-		let result = sourceArray.map { (sourceElement) -> Element in
+		let result = sourceArray.compactMap { (sourceElement) -> Element? in
 			let id = sourceElementId(sourceElement)
 			if let element = elementById[id] {
 				// According to our index the current array already has a matching element, so just keep it...
@@ -87,9 +110,13 @@ extension Array {
 				}
 				return element
 			} else {
-				// There is no matching element in the current array, let's create it at this position.
-				changed = true
-				return transform(sourceElement)
+				// There is no matching element in the current array, let's create it at
+				// this position as long as it transforms.
+				if let el = transform(sourceElement) {
+					changed = true
+					return el
+				}
+				return nil
 			}
 		}
 
