@@ -11,7 +11,7 @@ iOS library that helps finding (UITableView-compatible) differences between two 
 
 Podfile:
 
-```
+```ruby
 source 'https://github.com/mediamonks/MMMSpecs.git'
 source 'https://github.com/CocoaPods/Specs.git'
 # ...
