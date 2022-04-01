@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MMMArrayChanges Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/MMMArrayChanges" class="dashAnchor"></a>
+    <a title="MMMArrayChanges Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">MMMArrayChanges 1.1.1 Docs</a> (0% documented)</p>
+        <div class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </div>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">MMMArrayChanges Reference</a>
+        <img id="carat" src="../img/carat.png" alt=""/>
+        MMMArrayChanges Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/MMMArrayChanges.html">MMMArrayChanges</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MMMArrayChanges/Removal.html">– Removal</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MMMArrayChanges/Insertion.html">– Insertion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MMMArrayChanges/Move.html">– Move</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MMMArrayChanges/Update.html">– Update</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>MMMArrayChanges</h1>
+            <p>Finds the differences between two arrays with elements possibly of different types.</p>
+
+<p>(<code>MMMArrayChanges</code> ported from ObjC for better performance and convenience. The ObjC version was unable to directly
+work with arrays of Swift protocols among other things.)</p>
+
+<p>This is to help with detection of changes in a collection of items in general and in particular to have these changes
+compatible with expectations of <code>UITableView</code>.</p>
+
+<p>A typical use case is when we sync a list of items with a backend periodically and want to properly animate all
+the changes in the table view using batch updates.</p>
+
+<p>Note that in order to remain compatible with <code>UITableView</code> the indexes for removals and the source indexes
+for moves are always relative to the old array without any changes perfomed on it yet, while the target indexes
+for moves and the indexes of insertions are relative to the new array.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Struct/Removal" class="dashAnchor"></a>
+                    <a class="token" href="#/">Removal</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Classes/MMMArrayChanges/Removal.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Struct/Insertion" class="dashAnchor"></a>
+                    <a class="token" href="#/">Insertion</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Classes/MMMArrayChanges/Insertion.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Struct/Move" class="dashAnchor"></a>
+                    <a class="token" href="#/">Move</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Classes/MMMArrayChanges/Move.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Struct/Update" class="dashAnchor"></a>
+                    <a class="token" href="#/">Update</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Classes/MMMArrayChanges/Update.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/removals" class="dashAnchor"></a>
+                    <a class="token" href="#/">removals</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/insertions" class="dashAnchor"></a>
+                    <a class="token" href="#/">insertions</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/moves" class="dashAnchor"></a>
+                    <a class="token" href="#/">moves</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/updates" class="dashAnchor"></a>
+                    <a class="token" href="#/">updates</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/init(removals:insertions:moves:updates:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(removals:<wbr>insertions:<wbr>moves:<wbr>updates:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/isEmpty" class="dashAnchor"></a>
+                    <a class="token" href="#/">isEmpty</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>True if the receiver represents &ldquo;no changes&rdquo; situation.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/==(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">==(_:<wbr>_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/description" class="dashAnchor"></a>
+                    <a class="token" href="#/">description</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/applyToArray(_:sourceArray:remove:transform:update:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">applyToArray(_:<wbr>sourceArray:<wbr>remove:<wbr>transform:<wbr>update:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Replays the changes represented by the receiver onto the given array (which in general is different from the array
+that was used to record the changes).</p>
+
+<p>The order of closures in the parameters reflects the order of operations:</p>
+
+<ol>
+<li>Items corresponding to records in <code><a href="../Classes/MMMArrayChanges.html#/removals">removals</a></code> are deleted with the <code>remove</code> closure called after every removal.</li>
+<li>Items are moved according to <code><a href="../Classes/MMMArrayChanges.html#/moves">moves</a></code> records.</li>
+<li>New items are inserted with <code>transform</code> closure making items for the array from items of the <code>sourceArray</code>.</li>
+<li>Old items are updated from the new ones by the <code>update</code> closure.</li>
+</ol>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/applySkippingReloads(tableView:indexPathForItemIndex:deletionAnimation:insertionAnimation:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">applySkippingReloads(tableView:<wbr>indexPathForItemIndex:<wbr>deletionAnimation:<wbr>insertionAnimation:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Replays the changes represented by the receiver onto a <code>UITableView</code> within a <code>beginUpdates()</code>/<code>endUpdates()</code> block.</p>
+
+<p>Only the changes corresponding to <code><a href="../Classes/MMMArrayChanges.html#/removals">removals</a></code>, <code><a href="../Classes/MMMArrayChanges.html#/insertions">insertions</a></code> and <code><a href="../Classes/MMMArrayChanges.html#/moves">moves</a></code> are replayed.
+The ones corresponding to the <code><a href="../Classes/MMMArrayChanges.html#/updates">updates</a></code> should be replayed as row reloads in a separate call because:</p>
+
+<ol>
+<li>They are not needed when cells observe the corresponding view models on their own and their heights don&rsquo;t change.</li>
+<li>Reloads cannot belong to the same <code>beginUpdates()</code>/<code>endUpdates()</code> transaction as cells that move cannot be
+reloaded as well (getting &ldquo;attempt to perform a delete and a move from the same index path&rdquo;).</li>
+<li>Replaying the reloads in a separate <code>beginUpdates()</code>/<code>endUpdates()</code> block just after the insertions/removals
+won&rsquo;t lead to nice results anyway, one have to wait for the previous animations to complete.</li>
+</ol>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/applyReloadsAfter(tableView:indexPathForItemIndex:reloadAnimation:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">applyReloadsAfter(tableView:<wbr>indexPathForItemIndex:<wbr>reloadAnimation:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Applies the changes corresponding to <code><a href="../Classes/MMMArrayChanges.html#/updates">updates</a></code> property of the receiver as row reloads on the given table view
+within a <code>beginUpdates()</code>/<code>endUpdates()</code> block. It is assumed that other changes represented by the receiver
+have been applied already, i.e. this function works with <code>newIndex</code> property of every record in <code><a href="../Classes/MMMArrayChanges.html#/updates">updates</a></code>.</p>
+
+<p>This is needed for better cell update animations when reloads should happen at the same time as movements/removals/insertions.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/applyReloadsBefore(tableView:indexPathForItemIndex:reloadAnimation:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">applyReloadsBefore(tableView:<wbr>indexPathForItemIndex:<wbr>reloadAnimation:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Same as <code><a href="../Classes/MMMArrayChanges.html#/applyReloadsAfter(tableView:indexPathForItemIndex:reloadAnimation:)">applyReloadsAfter(tableView:indexPathForItemIndex:reloadAnimation:)</a></code> but assuming that other changes represented
+by the receiver have <strong>not</strong> been applied already, i.e. this function works with <code>oldIndex</code> property of every record in <code><a href="../Classes/MMMArrayChanges.html#/updates">updates</a></code>.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/byUpdatingArray(_:elementId:sourceArray:sourceElementId:update:remove:transform:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">byUpdatingArray(_:<wbr>elementId:<wbr>sourceArray:<wbr>sourceElementId:<wbr>update:<wbr>remove:<wbr>transform:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Finds UITableView-compatible differences between two arrays consisting of elements of different types
+updating the given array along the way while avoiding recreating elements that have corresponding elements
+in the <code>sourceArray</code>.</p>
+
+<p>The <code>elementId</code> and <code>sourceElementId</code> closures should be able to provide an ID that can be used to distiniguish
+elements of the old and new arrays.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/byUpdatingArrayOfObjects(_:sourceArray:update:remove:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">byUpdatingArrayOfObjects(_:<wbr>sourceArray:<wbr>update:<wbr>remove:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A shortcut for the case when both arrays contain objects of reference types and their references can be used as
+ identifiers.
+/</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    I could name it <code>byUpdatingArray</code> as well, but that confuses Swift 4.2, it cannot find a proper method
+even though at least <code>elementId:</code> label is not present in this one.
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/betweenSimpleArrays(oldArray:newArray:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">betweenSimpleArrays(oldArray:<wbr>newArray:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Changes between two simple arrays consisting of the same hashable value types, so elements themselves can
+be used as their own identifiers.
+(This is mainly used for testing the receiver using arrays of Int.)</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2022 <a class="link" href="https://github.com/mediamonks/MMMArrayChanges" target="_blank" rel="external noopener">MediaMonks</a>. All rights reserved. (Last updated: 2022-04-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MMMArrayChanges  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a title="MMMArrayChanges  Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="index.html">MMMArrayChanges 1.1.1 Docs</a> (0% documented)</p>
+        <div class="header-right">
+          <form role="search" action="search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </div>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="index.html">MMMArrayChanges Reference</a>
+        <img id="carat" src="img/carat.png" alt=""/>
+        MMMArrayChanges  Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MMMArrayChanges/Removal.html">– Removal</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MMMArrayChanges/Insertion.html">– Insertion</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MMMArrayChanges/Move.html">– Move</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MMMArrayChanges/Update.html">– Update</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Extensions/Array.html">Array</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            
+            <h1 id='mmmarraychanges' class='heading'>MMMArrayChanges</h1>
+
+<p><a href="https://github.com/mediamonks/MMMArrayChanges/actions?query=workflow%3ABuild"><img src="https://github.com/mediamonks/MMMArrayChanges/workflows/Build/badge.svg" alt="Build"></a>
+<a href="https://github.com/mediamonks/MMMArrayChanges/actions?query=workflow%3ATest"><img src="https://github.com/mediamonks/MMMArrayChanges/workflows/Test/badge.svg" alt="Test"></a></p>
+
+<p>iOS library that helps finding (UITableView-compatible) differences between two arrays possibly having elements of different types.</p>
+
+<p>(This is a part of <code>MMMTemple</code> suite of iOS libraries we use at <a href="https://www.mediamonks.com/">MediaMonks</a>.)</p>
+<h2 id='installation' class='heading'>Installation</h2>
+
+<p>Podfile:</p>
+<pre class="highlight ruby"><code><span class="n">source</span> <span class="s1">'https://github.com/mediamonks/MMMSpecs.git'</span>
+<span class="n">source</span> <span class="s1">'https://github.com/CocoaPods/Specs.git'</span>
+<span class="c1"># ...</span>
+<span class="n">pod</span> <span class="s1">'MMMArrayChanges'</span>
+</code></pre>
+
+<p>SPM:</p>
+<pre class="highlight swift"><code><span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/mediamonks/MMMArrayChanges"</span><span class="p">,</span> <span class="o">.</span><span class="nf">upToNextMajor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"1.1.0"</span><span class="p">))</span>
+</code></pre>
+<h2 id='example' class='heading'>Example</h2>
+
+<p>(See <code>./Tests/MMMArrayChangesTestCase.swift</code> for a more complete example on <code>diffUpdate()</code> and the iOS project in <code>./Example</code> on how to use <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> class to drive bulk animations of a <code>UITableView</code>.)</p>
+
+<p><img src="./Example.gif" alt="Example GIF"></p>
+
+<p>Imagine we are somewhere in a model representing a list of cookies updatable from a backend:</p>
+<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">CookieModel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre>
+
+<p>And we&rsquo;ve got our first ever update:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">apiResponse</span><span class="p">:</span> <span class="p">[</span><span class="kt">CookieFromAPI</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Oreo"</span><span class="p">),</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Butter cookie"</span><span class="p">),</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Almond biscuit"</span><span class="p">),</span>
+    <span class="c1">// ...</span>
+<span class="p">]</span>
+</code></pre>
+
+<p>Note that <code>CookieModel</code> objects in our list model are <a href="https://martinfowler.com/bliki/AnemicDomainModel.html">fat</a> and provide lots of extra functionality, while our <code>CookieFromAPI</code> are plain and simple structures coming directly from the API layer.</p>
+
+<p>We could recreate all our models and notify the observers of the whole list every time we get a new list from the API:</p>
+<pre class="highlight swift"><code><span class="n">items</span> <span class="o">=</span> <span class="n">apiResponse</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="p">(</span><span class="n">plainCookie</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">CookieModel</span> <span class="k">in</span>
+    <span class="k">return</span> <span class="kt">CookieModel</span><span class="p">(</span><span class="nv">apiModel</span><span class="p">:</span> <span class="n">plainCookie</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>However if almost nothing has changed in the list, then it would be nicer (performance-wise and very often
+visually), to nofity only the observers of updated cookies, like &ldquo;Almond biscuit&rdquo;&lsquo;s in this case:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">apiResponse2</span><span class="p">:</span> <span class="p">[</span><span class="kt">CookieFromAPI</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Almond cake"</span><span class="p">),</span> <span class="c1">// &lt;-- changed name</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Butter cookie"</span><span class="p">),</span>
+    <span class="kt">CookieFromAPI</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="s">"Biscotti"</span><span class="p">)</span>
+    <span class="c1">// ...</span>
+<span class="p">]</span>
+</code></pre>
+
+<p>Simple <code>map()</code> would not be enough and we would need to figure our which cookies in our API response correspond to which cookies in our current list. We would also need to handle new cookies and the ones that are not in the list anymore. Also, in case such a list is also linked to a <code>UITableView</code>, then we would need to generate updates/animations without breaking it (something that&rsquo;s quite hard to do in case of multi-item updates).</p>
+
+<p><img src="./Pic1.svg" alt="Illustration"></p>
+
+<p>Enter <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> (ObjC-friendly and <code>UITableView</code>-compatible) or, for a simple Swift cases, a <code>diffUpdate()</code> extension on Array:</p>
+<pre class="highlight swift"><code><span class="n">items</span><span class="o">.</span><span class="nf">diffUpdate</span><span class="p">(</span>
+    <span class="c1">// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.</span>
+    <span class="nv">elementId</span><span class="p">:</span> <span class="p">{</span> <span class="p">(</span><span class="n">cookie</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">String</span> <span class="k">in</span>
+        <span class="k">return</span> <span class="n">cookie</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">},</span>
+    <span class="nv">sourceArray</span><span class="p">:</span> <span class="n">apiResponse</span><span class="p">,</span>
+    <span class="c1">// We decided to use the same IDs that are used by the models, i.e. string ones.</span>
+    <span class="nv">sourceElementId</span><span class="p">:</span> <span class="p">{</span> <span class="n">plainCookie</span> <span class="o">-&gt;</span> <span class="kt">String</span> <span class="k">in</span> <span class="s">"</span><span class="se">\(</span><span class="n">plainCookie</span><span class="o">.</span><span class="n">id</span><span class="se">)</span><span class="s">"</span> <span class="p">},</span>
+    <span class="nv">transform</span><span class="p">:</span> <span class="p">{</span> <span class="p">(</span><span class="n">apiModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Cookie</span> <span class="k">in</span>
+        <span class="c1">// Called for every plain API object that has no corresponding "thick" cookie model yet,</span>
+        <span class="c1">// i.e. for every new cookie. We create new "thick" models only for those.</span>
+        <span class="k">return</span> <span class="kt">Cookie</span><span class="p">(</span><span class="nv">apiModel</span><span class="p">:</span> <span class="n">apiModel</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="nv">update</span><span class="p">:</span> <span class="p">{</span> <span class="p">(</span><span class="n">cookie</span><span class="p">,</span> <span class="n">apiCookie</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span> <span class="k">in</span>
+        <span class="c1">// Called for every cookie model that still has a corresponding plain object in the API response.</span>
+        <span class="c1">// Let's update the fields we are interested in and notify observers only when needed.</span>
+        <span class="k">return</span> <span class="n">cookie</span><span class="o">.</span><span class="nf">update</span><span class="p">(</span><span class="nv">apiModel</span><span class="p">:</span> <span class="n">apiCookie</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="nv">remove</span><span class="p">:</span> <span class="p">{</span> <span class="p">(</span><span class="n">cookie</span><span class="p">)</span> <span class="k">in</span>
+        <span class="c1">// Called for all cookies that don't have matching plain objects in the backend response.</span>
+        <span class="c1">// Let's just mark them as removed just in case somebody holds a reference to them a bit longer than</span>
+        <span class="c1">// needed and might appreciate knowing that the object they hold is not in the main list anymore.</span>
+        <span class="n">cookie</span><span class="o">.</span><span class="nf">markAsRemoved</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre>
+<h2 id='ready-for-liftoff' class='heading'>Ready for liftoff? 🚀</h2>
+
+<p>We&rsquo;re always looking for talent. Join one of the fastest-growing rocket ships in
+the business. Head over to our <a href="https://media.monks.com/careers">careers page</a>
+for more info!</p>
+
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2022 <a class="link" href="https://github.com/mediamonks/MMMArrayChanges" target="_blank" rel="external noopener">MediaMonks</a>. All rights reserved. (Last updated: 2022-04-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>
