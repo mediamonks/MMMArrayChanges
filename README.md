@@ -28,7 +28,7 @@ SPM:
 
 (See `./Tests/MMMArrayChangesTestCase.swift` for a more complete example on `diffUpdate()` and the iOS project in `./Example` on how to use `MMMArrayChanges` class to drive bulk animations of a `UITableView`.)
 
-![Example GIF](./Example.gif)
+![Example GIF](https://github.com/mediamonks/MMMArrayChanges/raw/main/Example.gif)
 
 Imagine we are somewhere in a model representing a list of cookies updatable from a backend:
 
@@ -71,7 +71,7 @@ let apiResponse2: [CookieFromAPI] = [
 
 Simple `map()` would not be enough and we would need to figure our which cookies in our API response correspond to which cookies in our current list. We would also need to handle new cookies and the ones that are not in the list anymore. Also, in case such a list is also linked to a `UITableView`, then we would need to generate updates/animations without breaking it (something that's quite hard to do in case of multi-item updates).
 
-![Illustration](./Pic1.svg)
+![Illustration](https://github.com/mediamonks/MMMArrayChanges/raw/main/Pic1.svg)
 
 Enter `MMMArrayChanges` (ObjC-friendly and `UITableView`-compatible) or, for a simple Swift cases, a `diffUpdate()` extension on Array:
 
