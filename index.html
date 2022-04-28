@@ -34,7 +34,7 @@
     </header>
 
     <p class="breadcrumbs">
-      <a class="breadcrumb" href="index.html">MMMArrayChanges Reference</a>
+      <a class="breadcrumb" href="index.html">MMMArrayChanges</a>
       <img class="carat" src="img/carat.png" alt=""/>
       MMMArrayChanges  Reference
     </p>
@@ -101,7 +101,7 @@
 
 <p>(See <code>./Tests/MMMArrayChangesTestCase.swift</code> for a more complete example on <code>diffUpdate()</code> and the iOS project in <code>./Example</code> on how to use <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> class to drive bulk animations of a <code>UITableView</code>.)</p>
 
-<p><img src="./Example.gif" alt="Example GIF"></p>
+<p><img src="https://github.com/mediamonks/MMMArrayChanges/raw/main/Example.gif" alt="Example GIF"></p>
 
 <p>Imagine we are somewhere in a model representing a list of cookies updatable from a backend:</p>
 <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">CookieModel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -136,7 +136,7 @@ visually), to nofity only the observers of updated cookies, like &ldquo;Almond b
 
 <p>Simple <code>map()</code> would not be enough and we would need to figure our which cookies in our API response correspond to which cookies in our current list. We would also need to handle new cookies and the ones that are not in the list anymore. Also, in case such a list is also linked to a <code>UITableView</code>, then we would need to generate updates/animations without breaking it (something that&rsquo;s quite hard to do in case of multi-item updates).</p>
 
-<p><img src="./Pic1.svg" alt="Illustration"></p>
+<p><img src="https://github.com/mediamonks/MMMArrayChanges/raw/main/Pic1.svg" alt="Illustration"></p>
 
 <p>Enter <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> (ObjC-friendly and <code>UITableView</code>-compatible) or, for a simple Swift cases, a <code>diffUpdate()</code> extension on Array:</p>
 <pre class="highlight swift"><code><span class="n">items</span><span class="o">.</span><span class="nf">diffUpdate</span><span class="p">(</span>
@@ -178,7 +178,7 @@ for more info!</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2022 <a class="link" href="https://media.monks.com" target="_blank" rel="external noopener">Media.Monks</a>. All rights reserved. (Last updated: 2022-04-26)</p>
+      <p>&copy; 2022 <a class="link" href="https://media.monks.com" target="_blank" rel="external noopener">Media.Monks</a>. All rights reserved. (Last updated: 2022-04-28)</p>
       <p></p>
     </section>
   </body>
