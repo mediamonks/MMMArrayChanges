@@ -42,34 +42,6 @@
     <div class="content-wrapper">
       <nav class="navigation">
         <ul class="nav-groups">
-          <li class="nav-group-name">
-            <a class="nav-group-name-link" href="Classes.html">Classes</a>
-            <ul class="nav-group-tasks">
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MMMArrayChanges.html">MMMArrayChanges</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MMMArrayChanges/Removal.html">– Removal</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MMMArrayChanges/Insertion.html">– Insertion</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MMMArrayChanges/Move.html">– Move</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MMMArrayChanges/Update.html">– Update</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
-            <a class="nav-group-name-link" href="Extensions.html">Extensions</a>
-            <ul class="nav-group-tasks">
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Extensions/Array.html">Array</a>
-              </li>
-            </ul>
-          </li>
         </ul>
       </nav>
       <article class="main-content">
@@ -99,7 +71,7 @@
 </code></pre>
 <h2 id='example' class='heading'>Example</h2>
 
-<p>(See <code>./Tests/MMMArrayChangesTestCase.swift</code> for a more complete example on <code>diffUpdate()</code> and the iOS project in <code>./Example</code> on how to use <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> class to drive bulk animations of a <code>UITableView</code>.)</p>
+<p>(See <code>./Tests/MMMArrayChangesTestCase.swift</code> for a more complete example on <code>diffUpdate()</code> and the iOS project in <code>./Example</code> on how to use <code>MMMArrayChanges</code> class to drive bulk animations of a <code>UITableView</code>.)</p>
 
 <p><img src="https://github.com/mediamonks/MMMArrayChanges/raw/main/Example.gif" alt="Example GIF"></p>
 
@@ -138,7 +110,7 @@ visually), to nofity only the observers of updated cookies, like &ldquo;Almond b
 
 <p><img src="https://github.com/mediamonks/MMMArrayChanges/raw/main/Pic1.svg" alt="Illustration"></p>
 
-<p>Enter <code><a href="Classes/MMMArrayChanges.html">MMMArrayChanges</a></code> (ObjC-friendly and <code>UITableView</code>-compatible) or, for a simple Swift cases, a <code>diffUpdate()</code> extension on Array:</p>
+<p>Enter <code>MMMArrayChanges</code> (ObjC-friendly and <code>UITableView</code>-compatible) or, for a simple Swift cases, a <code>diffUpdate()</code> extension on Array:</p>
 <pre class="highlight swift"><code><span class="n">items</span><span class="o">.</span><span class="nf">diffUpdate</span><span class="p">(</span>
     <span class="c1">// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.</span>
     <span class="nv">elementId</span><span class="p">:</span> <span class="p">{</span> <span class="p">(</span><span class="n">cookie</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">String</span> <span class="k">in</span>
@@ -178,7 +150,7 @@ for more info!</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2022 <a class="link" href="https://media.monks.com" target="_blank" rel="external noopener">Media.Monks</a>. All rights reserved. (Last updated: 2022-04-28)</p>
+      <p>&copy; 2023 <a class="link" href="https://media.monks.com" target="_blank" rel="external noopener">Media.Monks</a>. All rights reserved. (Last updated: 2023-09-19)</p>
       <p></p>
     </section>
   </body>
