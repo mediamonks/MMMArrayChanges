@@ -308,9 +308,9 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 
 	- Parameters:
 
-		- update: Optional closure that's called for every element in the array that was not added to update its contents.
+		- update: Closure that's called for every element in the array that was not added to update its contents.
 
-		- remove: Optional closure that's called for every removed element of the array.
+		- remove: Closure that's called for every removed element of the array.
 			Note that it should not try removing the corresponing element, it's only for your own book-keeping.
 
 		- transform: A closure that should be able to creat a new element of the array from the corresponding element
@@ -319,8 +319,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	public static func byUpdatingArray<Element, SourceElement, ElementId: Hashable>(
 		_ array: inout [Element], elementId: (Element) -> ElementId,
 		sourceArray: [SourceElement], sourceElementId: (SourceElement) -> ElementId,
-		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool)? = nil,
-		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil,
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: SourceElement, _ newIndex: Int) -> Bool),
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void),
 		transform: (_ newElement: SourceElement, _ newIndex: Int) -> Element
 	) -> MMMArrayChanges {
 
@@ -342,7 +342,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 				// But let's check for item updates.
 				var updates: [Update] = []
 				for i in 0..<array.count {
-					if update?(array[i], i, sourceArray[i], i) ?? false {
+					if update(array[i], i, sourceArray[i], i) {
 						updates.append(.init(i, i))
 					}
 				}
@@ -404,7 +404,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 			if oldId == newId {
 
 				// The item is at its target position already, let's only check if the contents has updated.
-				if update?(oldItem, oldIndex, newItem, newIndex) ?? false {
+				if update(oldItem, oldIndex, newItem, newIndex) {
 					updates.append(.init(oldIndex, newIndex))
 				}
 
@@ -434,7 +434,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 				intermediate.insert(t, at: intermediateTargetIndex)
 
 				// And finally check if the item has content changes as well.
-				if update?(array[oldNewIndex], oldNewIndex, newItem, newIndex) ?? false {
+				if update(array[oldNewIndex], oldNewIndex, newItem, newIndex) {
 					// Yes, record an update, too.
 					updates.append(.init(oldNewIndex, newIndex))
 				}
@@ -446,7 +446,7 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 		for r in removals {
 			let item = array[r.index]
 			array.remove(at: r.index)
-			remove?(item, r.index)
+			remove(item, r.index)
 		}
 
 		for m in moves {
@@ -471,8 +471,8 @@ public class MMMArrayChanges: CustomStringConvertible, Equatable {
 	public static func byUpdatingArrayOfObjects<Element: AnyObject>(
 		_ array: inout [Element],
 		sourceArray: [Element],
-		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool)? = nil,
-		remove: ((_ element: Element, _ oldIndex: Int) -> Void)? = nil
+		update: ((_ element: Element, _ oldIndex: Int, _ sourceElement: Element, _ newIndex: Int) -> Bool),
+		remove: ((_ element: Element, _ oldIndex: Int) -> Void)
 	) -> MMMArrayChanges {
 		let result = byUpdatingArray(
 			&array,

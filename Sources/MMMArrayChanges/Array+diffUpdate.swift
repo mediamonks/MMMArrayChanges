@@ -65,8 +65,8 @@ extension Array {
 		elementId: (_ element: Element) -> ElementId,
 		sourceArray: [SourceElement], sourceElementId: (_ sourceElement: SourceElement) -> ElementId,
 		transform: (_ sourceElement: SourceElement) -> Element,
-		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool)? = nil,
-		remove: ((_ element: Element) -> Void)? = nil
+		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool),
+		remove: ((_ element: Element) -> Void)
 	) -> Bool {
 		// We just use the compact logic here, since that will behave the same with a
 		// non-optional transform closure.
@@ -88,8 +88,8 @@ extension Array {
 		elementId: (_ element: Element) -> ElementId,
 		sourceArray: [SourceElement], sourceElementId: (_ sourceElement: SourceElement) -> ElementId,
 		transform: (_ sourceElement: SourceElement) -> Element?,
-		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool)? = nil,
-		remove: ((_ element: Element) -> Void)? = nil
+		update: ((_ element: Element, _ sourceElement: SourceElement) -> Bool),
+		remove: ((_ element: Element) -> Void)
 	) -> Bool {
 
 		var changed = false
@@ -103,7 +103,7 @@ extension Array {
 				// According to our index the current array already has a matching element, so just keep it...
 				elementById.removeValue(forKey: id)
 				// ...possibly updating.
-				if update?(element, sourceElement) ?? false {
+				if update(element, sourceElement) {
 					// The update closure indicated that a change in the existing element should be counted
 					// alongside with removals, additions and moves.
 					changed = true
@@ -142,10 +142,8 @@ extension Array {
 			self = result
 
 			// IDs left in the index correspond to elements missing in the new array, so they have to me marked as gone.
-			if let remove = remove {
-				elementById.forEach { (_, element) in
-					remove(element)
-				}
+			elementById.forEach { (_, element) in
+				remove(element)
 			}
 		}
 

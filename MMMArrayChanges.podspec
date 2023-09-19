@@ -6,7 +6,7 @@
 Pod::Spec.new do |s|
 
 	s.name = "MMMArrayChanges"
-	s.version = "1.1.1"
+	s.version = "2.0.0"
 	s.summary = "Helps finding (UITableView-compatible) differences between two arrays possibly of different types"
 	s.description =  s.summary
 	s.homepage = "https://github.com/mediamonks/MMMArrayChanges"
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
 	end
 
 	s.test_spec 'TestsSwift' do |test_spec|
-		test_spec.source_files = 'Tests/*.swift'
+		test_spec.source_files = 'Tests/**/*.swift'
 	end
 
 	s.default_subspec = 'ObjC', 'Swift'
