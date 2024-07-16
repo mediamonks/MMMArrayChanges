@@ -55,10 +55,6 @@ extension Array {
 	- Returns:
 		`true`, if the array has changed, i.e. if elements were added or removed or `update` closure
 		returned `true` for at least one element.
-
-	- Complexity:
-
-		Must be *O(n^2)* because removing elements from a dictionary is quoted at *O(n)*.
 	*/
 	@discardableResult
 	public mutating func diffUpdate<SourceElement, ElementId: Hashable>(
@@ -70,7 +66,7 @@ extension Array {
 	) -> Bool {
 		// We just use the compact logic here, since that will behave the same with a
 		// non-optional transform closure.
-		return compactDiffUpdate(
+		compactDiffUpdate(
 			elementId: elementId,
 			sourceArray: sourceArray,
 			sourceElementId: sourceElementId,
@@ -79,7 +75,7 @@ extension Array {
 			remove: remove
 		)
 	}
-	
+
 	@discardableResult
 	/// The same as ``diffUpdate(elementId:sourceArray:transform:update:remove)`` except that it
 	/// behaves as a `Array.compactMap` instead of `Array.map`, for cases where your source array can contain
@@ -92,58 +88,89 @@ extension Array {
 		remove: ((_ element: Element) -> Void)
 	) -> Bool {
 
+		// We don't officially support duplicate IDs, but it's still useful to remove them from the source in the field.
+		func uniquedSourceArray() -> [SourceElement] {
+			var seen = Set<ElementId>()
+			return sourceArray.compactMap { sourceElement -> SourceElement? in
+				let id = sourceElementId(sourceElement)
+				if seen.contains(id) {
+					return nil
+				} else {
+					seen.insert(id)
+					return sourceElement
+				}
+			}
+		}
+
+		// Special cases are fairly common and should be worth handling.
+		if self.isEmpty {
+			self = uniquedSourceArray().compactMap(transform)
+			return !self.isEmpty
+		} else if sourceArray.isEmpty {
+			self.forEach(remove)
+			self = []
+			return true
+		} else if self.count == sourceArray.count && self.lazy.map(elementId) == sourceArray.lazy.compactMap(sourceElementId) {
+			var changed = false
+			for (old, new) in zip(self.lazy, sourceArray.lazy) {
+				if update(old, new) {
+					changed = true
+				}
+			}
+			return changed
+		}
+
+		// Let's build an index of the existing elements, i.e. ID -> Element.
+		var elementById = [ElementId: Element?].init(
+			self.map { (elementId($0), $0) },
+			// Again, we don't officially support non-unique IDs, but we'd rather not crash.
+			uniquingKeysWith: { first, _ in first }
+		)
+
 		var changed = false
+		let sourceArray = uniquedSourceArray()
 
-		// First building an index of the existing elements, i.e. ID -> Element.
-		var elementById = [ElementId: Element](uniqueKeysWithValues: self.map { (elementId($0), $0) })
-
-		let result = sourceArray.compactMap { (sourceElement) -> Element? in
+		let result = sourceArray.compactMap { sourceElement -> Element? in
 			let id = sourceElementId(sourceElement)
-			if let element = elementById[id] {
-				// According to our index the current array already has a matching element, so just keep it...
-				elementById.removeValue(forKey: id)
-				// ...possibly updating.
+			switch elementById[id] {
+			case .some(let element?):
+				// The current array already has a matching element, so just keep it and update.
 				if update(element, sourceElement) {
 					// The update closure indicated that a change in the existing element should be counted
 					// alongside with removals, additions and moves.
 					changed = true
 				}
+				// Mark as seen by replacing with a nil (instead of removing), so we can detect duplicates
+				// and avoid potential O(*n*) complexity of `removeValue`.
+				elementById[id] = .some(.none)
 				return element
-			} else {
-				// There is no matching element in the current array, let's create it at
-				// this position as long as it transforms.
-				if let el = transform(sourceElement) {
-					changed = true
-					return el
-				}
+			case .some(.none):
+				// Duplicate ID, filtering out.
 				return nil
+			case .none:
+				// There is no matching element, let's create it at this position as long as it transforms.
+				guard let el = transform(sourceElement) else {
+					return nil
+				}
+				changed = true
+				return el
 			}
 		}
 
 		// Leftovers in the index mean removed elements and thus that the array had changes.
-		if !elementById.isEmpty {
-			changed = true
-		}
+		changed = changed || elementById.values.contains { $0 != nil }
 
 		if !changed {
-			// Seems like no additions or removals, but it's possible that the order of elements has changed.
+			// No additions or removals, but it's possible that the order of elements has changed.
 			assert(self.count == result.count)
-			for i in 0..<self.count {
-				if elementId(self[i]) != elementId(result[i]) {
-					// Right, something is off, report the change and most importantly update the current array.
-					changed = true
-					break
-				}
-			}
+			changed = self.lazy.map(elementId) != sourceArray.lazy.compactMap(sourceElementId)
 		}
 
 		if changed {
-
 			self = result
-
 			// IDs left in the index correspond to elements missing in the new array, so they have to me marked as gone.
-			elementById.forEach { (_, element) in
-				remove(element)
+			elementById.values.forEach {
+				$0.map(remove)
 			}
 		}
 

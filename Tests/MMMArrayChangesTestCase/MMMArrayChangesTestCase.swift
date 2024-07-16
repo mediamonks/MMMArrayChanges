@@ -84,7 +84,7 @@ private struct CookieFromAPI {
 
 class MMMArrayChangesTestCaseSwift : XCTestCase {
 
-	func testBasics() {
+	public func testBasics() {
 		XCTAssertEqual(
 			MMMArrayChanges.betweenSimpleArrays(oldArray: [1, 2, 3], newArray: [3, 4, 2]),
 			MMMArrayChanges(
@@ -96,7 +96,7 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		)
 	}
 
-	func testDiffUpdate() {
+	public func testDiffUpdate() {
 
 		// Imagine we are somewhere in a "thick" model representing a list of cookies.
 		var items: [Cookie] = []
@@ -108,8 +108,8 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		]
 
 		// We could simply recreate all our items and notify our observers (i.e. observers of the list itself).
-		items = apiResponse.map { (plainCookie) -> Cookie in
-			return Cookie(apiModel: plainCookie)
+		items = apiResponse.map { plainCookie in
+			Cookie(apiModel: plainCookie)
 		}
 
 		// ... notify observers about the whole list updated.
@@ -157,29 +157,83 @@ class MMMArrayChangesTestCaseSwift : XCTestCase {
 		XCTAssert(items[1] === animalCracker)
 	}
 
-	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) -> Bool {
+	// We don't officially support duplicates, but it's better to not crash nor generate extra changes when we encounter them.
+	public func testDuplicatesInDiffUpdate() {
 
-		return items.diffUpdate(
+		var items: [Cookie] = []
+
+		let apiResponse: [CookieFromAPI] = [
+			CookieFromAPI(id: 1, name: "Almond biscuit"),
+			CookieFromAPI(id: 2, name: "Animal cracker"),
+			CookieFromAPI(id: 2, name: "Oreo")
+		]
+		XCTAssertTrue(self.diffUpdate(items: &items, apiResponse: apiResponse))
+
+		// Duplicates are removed for free.
+		XCTAssertEqual(items.map { $0.id }, ["1", "2"])
+
+		// Duplicate elements should not cause changes.
+		XCTAssertFalse(self.diffUpdate(items: &items, apiResponse: apiResponse))
+	}
+
+	public func testPerformance() {
+
+		var items: [String] = []
+		let all = (0..<100000).map { "\($0)" }
+		let firstHalf = Array(all.prefix(all.count / 1))
+		let secondHalf = Array(all.suffix(all.count / 1))
+		let random = all.shuffled()
+
+		func update(_ source: [String], file: StaticString = #filePath, line: UInt = #line) {
+			items.compactDiffUpdate(
+				elementId: { $0 },
+				sourceArray: source,
+				sourceElementId: { $0 },
+				transform: { $0 },
+				update: { old, new in false },
+				remove: { old in
+				}
+			)
+			XCTAssertEqual(items, source, file: file, line: line)
+		}
+
+		measure {
+			for source in [
+				all, // Just filling in, quite common case.
+				all, all, all,// Cases when nothing changes are also common and perhaps should have more weight.
+				firstHalf, // Removed one half.
+				secondHalf, // Replaced one half.
+				all, // Inserted one half.
+				random, // Changed order of items.
+				[] // Deleted all, another common case.
+			] {
+				update(source)
+			}
+		}
+	}
+
+	private func diffUpdate(items: inout [Cookie], apiResponse: [CookieFromAPI]) -> Bool {
+		items.diffUpdate(
 			// We need to tell it how to match elements in the current and source arrays by providing IDs that can be compared.
-			elementId: { (cookie: Cookie) -> String in
+			elementId: { cookie in
 				return cookie.id
 			},
 			sourceArray: apiResponse,
 			// We decided to use the same IDs that are used by the models, i.e. string ones.
-			sourceElementId: { plainCookie -> String in "\(plainCookie.id)" },
-			transform: { (apiModel) -> Cookie in
+			sourceElementId: { plainCookie in "\(plainCookie.id)" },
+			transform: { apiModel in
 				// Called for every plain API object that has no corresponding "thick" cookie model yet,
 				// i.e. for every new cookie. We create new "thick" models only for those.
-				return Cookie(apiModel: apiModel)
+				Cookie(apiModel: apiModel)
 			},
-			update: { (cookie, apiCookie) -> Bool in
+			update: { cookie, apiCookie -> Bool in
 				// Called for every cookie model that still has a corresponding plain object in the API response.
 				// Let's update the fields we are interested in and notify observers of every individual object.
 				// Note that we could also return `false` here regardless of the change status of individual
 				// elements, so the diffUpdate() call would only return true in case elements were added or removed.
-				return cookie.update(apiModel: apiCookie)
+				cookie.update(apiModel: apiCookie)
 			},
-			remove: { (cookie: Cookie) in
+			remove: { cookie in
 				// Called for all cookies that don't have matching plain objects in the backend response.
 				// Let's just mark them as removed just in case somebody holds a reference to them a bit longer than
 				// needed and might appreciate knowing that the object they hold is not in the main list anymore.
